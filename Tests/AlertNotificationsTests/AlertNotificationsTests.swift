@@ -2,24 +2,60 @@ import XCTest
 @testable import AlertNotifications
 
 class AlertNotificationsTests: XCTestCase {
-    func testPostBody() {
-        let newAlert = Alert(what: "Test", where: "Test", severity: .Fatal)
-        let alertBody = newAlert.postBody()
+    // Ensure that the Alert object can correctly be written out to a JSON string.
+    func testAlertPostBody() {
+        let newAlert = Alert(what: "TestWhat", where: "TestWhere", severity: .Fatal, id: "TestID", when: 0, type: .Problem, source: "TestSource", applicationsOrServices: ["TestApps"], URLs: [AlertURL(description: "TestDesc", URL: "TestURL")], details: [Detail(name: "TestName", value: "TestValue")], emailMessageToSend: EmailMessage(subject: "TestSubject", body: "TestBody"), smsMessageToSend: "TestSMS", voiceMessageToSend: "TestVoice")
+        XCTAssertNotNil(newAlert)
+        let alertBody = newAlert!.postBody()
         XCTAssertNotNil(alertBody)
-        XCTAssertEqual("{\"Severity\":6,\"What\":\"Test\",\"Where\":\"Test\"}", String(data: alertBody!, encoding: .utf8))
+        let alertJsonString = String(data: alertBody!, encoding: .utf8)
+        XCTAssertNotNil(alertJsonString)
+        
+        // Ensure the JSON data was written out correctly.
+        XCTAssert(alertJsonString!.contains("\"What\":\"TestWhat\""))
+        XCTAssert(alertJsonString!.contains("\"Where\":\"TestWhere\""))
+        XCTAssert(alertJsonString!.contains("\"Severity\":6"))
+        XCTAssert(alertJsonString!.contains("\"Identifier\":\"TestID\""))
+        XCTAssert(alertJsonString!.contains("\"When\":\"1969-12-31 18:00:00\""))
+        XCTAssert(alertJsonString!.contains("\"Type\":\"Problem\""))
+        XCTAssert(alertJsonString!.contains("\"Source\":\"TestSource\""))
+        XCTAssert(alertJsonString!.contains("\"ApplicationsOrServices\":[\"TestApps\"]"))
+        XCTAssert(alertJsonString!.contains("\"URLs\":[{"))
+        XCTAssert(alertJsonString!.contains("\"URL\":\"TestURL\""))
+        XCTAssert(alertJsonString!.contains("\"Description\":\"TestDesc\""))
+        XCTAssert(alertJsonString!.contains("\"Details\":[{"))
+        XCTAssert(alertJsonString!.contains("\"Name\":\"TestName\""))
+        XCTAssert(alertJsonString!.contains("\"Value\":\"TestValue\""))
+        XCTAssert(alertJsonString!.contains("\"EmailMessageToSend\":{"))
+        XCTAssert(alertJsonString!.contains("\"Subject\":\"TestSubject\""))
+        XCTAssert(alertJsonString!.contains("\"Body\":\"TestBody\""))
+        XCTAssert(alertJsonString!.contains("\"SMSMessageToSend\":\"TestSMS\""))
+        XCTAssert(alertJsonString!.contains("\"VoiceMessageToSend\":\"TestVoice\""))
     }
     
-    func testExample() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        //XCTAssertEqual(AlertNotifications().text, "Hello, World!")
+    // Ensure that the alert POST function works correctly.
+    func testAlertPost() {
+        
     }
-
+    
+    // Ensure that the alert class GET function works correctly.
+    func testAlertGet() {
+        
+    }
+    
+    // Ensure that the alert class DELETE function works correctly.
+    func testAlertDelete() {
+        let deletedAlert = Alert.delete(id: "foo")
+        XCTAssertEqual(deletedAlert.statusCode, 204)
+        XCTAssertEqual(deletedAlert.message, "Successful request")
+    }
 
     static var allTests : [(String, (AlertNotificationsTests) -> () throws -> Void)] {
         return [
-            ("testPostBody", testPostBody),
-            ("testExample", testExample)
+            ("testAlertPostBody", testAlertPostBody),
+            ("testAlertPost", testAlertPost),
+            ("testAlertGet", testAlertGet),
+            ("testAlertDelete", testAlertDelete)
         ]
     }
 }

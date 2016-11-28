@@ -77,7 +77,7 @@ class Alert {
             postDict["Details"] = dataDetails
         }
         if let alertEmail = self.emailMessageToSend {
-            postDict["EmailMessageToSend"] = ["subject": "\(alertEmail.subject)", "body": "\(alertEmail.body)"]
+            postDict["EmailMessageToSend"] = ["Subject": "\(alertEmail.subject)", "Body": "\(alertEmail.body)"]
         }
         if let alertSMS = self.smsMessageToSend {
             postDict["SMSMessageToSend"] = alertSMS
@@ -142,18 +142,14 @@ class Alert {
      */
     
     // Base initializer.
-    init(what: String, where loc: String, severity: Severity, id: String? = nil, when: Date? = nil, type: String? = nil, source: String? = nil, applicationsOrServices: [String]? = nil, URLs: [AlertURL]? = nil, details: [Detail]? = nil, emailMessageToSend: EmailMessage? = nil, smsMessageToSend: String? = nil, voiceMessageToSend: String? = nil) {
+    init(what: String, where loc: String, severity: Severity, id: String? = nil, when: Date? = nil, type: AlertType? = nil, source: String? = nil, applicationsOrServices: [String]? = nil, URLs: [AlertURL]? = nil, details: [Detail]? = nil, emailMessageToSend: EmailMessage? = nil, smsMessageToSend: String? = nil, voiceMessageToSend: String? = nil) {
         
         self.what = what
         self.`where` = loc
         self.severity = severity
         self.id = id
         self.when = when
-        if type != nil {
-            self.type = AlertType(rawValue: type!.capitalized)
-        } else {
-            self.type = nil
-        }
+        self.type = type
         self.source = source
         self.applicationsOrServices = applicationsOrServices
         self.URLs = URLs
@@ -235,8 +231,8 @@ class Alert {
             if let voice = dictionary["VoiceMessageToSend"] as? String {
                 self.voiceMessageToSend = voice
             }
-            if let notificationState = dictionary["NotificationState"] as? String {
-                self.notificationState = NotificationState(rawValue: notificationState)
+            if let notificationState = dictionary["NotificationState"] as? String, let notValue = NotificationState(rawValue: notificationState) {
+                self.notificationState = notValue
             }
             if let firstOccurrence = dictionary["FirstOccurrence"] as? Int {
                 self.firstOccurrence = Date(timeIntervalSince1970: Double(firstOccurrence) as TimeInterval)
@@ -262,9 +258,10 @@ class Alert {
     }
     
     // Alternate option 1: string date.
-    convenience init?(what: String, where loc: String, severity: Severity, id: String? = nil, when: String, type: String? = nil, source: String? = nil, applicationsOrServices: [String]? = nil, URLs: [AlertURL]? = nil, details: [Detail]? = nil, emailMessageToSend: EmailMessage? = nil, smsMessageToSend: String? = nil, voiceMessageToSend: String? = nil) {
+    convenience init?(what: String, where loc: String, severity: Severity, id: String? = nil, when: String, type: AlertType? = nil, source: String? = nil, applicationsOrServices: [String]? = nil, URLs: [AlertURL]? = nil, details: [Detail]? = nil, emailMessageToSend: EmailMessage? = nil, smsMessageToSend: String? = nil, voiceMessageToSend: String? = nil) {
         
         let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         guard let date: Date = dateFormatter.date(from: when) else {
             return nil
         }
@@ -272,7 +269,7 @@ class Alert {
     }
     
     // Alternate option 2: integer date.
-    convenience init?(what: String, where loc: String, severity: Severity, id: String? = nil, when: Int, type: String? = nil, source: String? = nil, applicationsOrServices: [String]? = nil, URLs: [AlertURL]? = nil, details: [Detail]? = nil, emailMessageToSend: EmailMessage? = nil, smsMessageToSend: String? = nil, voiceMessageToSend: String? = nil) {
+    convenience init?(what: String, where loc: String, severity: Severity, id: String? = nil, when: Int, type: AlertType? = nil, source: String? = nil, applicationsOrServices: [String]? = nil, URLs: [AlertURL]? = nil, details: [Detail]? = nil, emailMessageToSend: EmailMessage? = nil, smsMessageToSend: String? = nil, voiceMessageToSend: String? = nil) {
         
         let date: Date = Date(timeIntervalSince1970: Double(when) as TimeInterval)
         self.init(what: what, where: loc, severity: severity, id: id, when: date, type: type, source: source, applicationsOrServices: applicationsOrServices, URLs: URLs, details: details, emailMessageToSend: emailMessageToSend, smsMessageToSend: smsMessageToSend, voiceMessageToSend: voiceMessageToSend)
