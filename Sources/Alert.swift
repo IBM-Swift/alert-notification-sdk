@@ -8,6 +8,8 @@
 
 import Foundation
 
+import LoggerAPI
+
 class Alert {
     /*
      * Instance variables and functions.
@@ -89,30 +91,60 @@ class Alert {
         do {
             return try JSONSerialization.data(withJSONObject: postDict, options: [])
         } catch _ {
-            
+            Log.error("Failed to convert Alert object to JSON.")
         }
         
         return nil
     }
     
     // Create a POST request with this alert.
-    func post(to alertURL: URL?, callback: ((Alert?, Error?) -> Void)?) throws -> URLSessionDataTask? {
+    func post(to alertURL: URL? = nil, user: String? = nil, password: String? = nil, callback: ((Alert?, Error?) -> Void)? = nil) throws -> URLSessionDataTask? {
+        // Either use the URL passed in as a parameter, or try to use the one pre-supplied in ServerCredentials.
+        var alertServerURL: URL? = alertURL
         if alertURL == nil {
-            throw AlertNotificationError.AlertError("No URL provided.")
+            guard let baseURL = ServerCredentials.host else {
+                throw AlertNotificationError.AlertError("No URL provided.")
+            }
+            alertServerURL = URL(string: "\(baseURL)/alerts/v1")
         }
         
         let session: URLSession = URLSession.shared
-        var request: URLRequest = URLRequest(url: alertURL!)
+        var request: URLRequest = URLRequest(url: alertServerURL!)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // If a user and password were not both passed into the function, try to use whatever is stored.
+        if user != nil && password != nil {
+            let rawAuth = "\(user):\(password)"
+            let encodedAuth = rawAuth.data(using: .utf8)!.base64EncodedString()
+            request.setValue("Basic \(encodedAuth)", forHTTPHeaderField: "Authorization")
+        } else if let storedAuthString = ServerCredentials.authString {
+            request.setValue("Basic \(storedAuthString)", forHTTPHeaderField: "Authorization")
+        } else {
+            throw AlertNotificationError.AlertError("No authentication credentials provided.")
+        }
+        
         guard let alertData = self.postBody() else {
             throw AlertNotificationError.AlertError("Invalid data in alert object.")
         }
         request.httpBody = alertData
         let postTask = session.dataTask(with: request) { (data, response, error) in
-            if data == nil || error != nil {
+            if data == nil {
+                let retError = error == nil ? AlertNotificationError.AlertError("Payload from server is empty.") : error
+                if callback != nil {
+                    callback!(nil, retError)
+                }
+                Log.error("Payload from server is empty.")
+                if error != nil {
+                    Log.error(error!.localizedDescription)
+                }
+                return
+            }
+            
+            if error != nil {
                 if callback != nil {
                     callback!(nil, error)
                 }
+                Log.error(error!.localizedDescription)
                 return
             }
             
@@ -120,6 +152,7 @@ class Alert {
                 if callback != nil {
                     callback!(nil, AlertNotificationError.AlertError("Malformed response from server."))
                 }
+                Log.error("Malformed response from server.")
                 return
             }
             
@@ -133,8 +166,8 @@ class Alert {
     }
     
     // Same, but handle the case of being passed a string URL.
-    func post(to alertURL: String, callback: ((Alert?, Error?) -> Void)?) throws -> URLSessionDataTask? {
-        return try self.post(to: URL(string: alertURL), callback: callback)
+    func post(to alertURL: String, user: String? = nil, password: String? = nil, callback: ((Alert?, Error?) -> Void)? = nil) throws -> URLSessionDataTask? {
+        return try self.post(to: URL(string: "\(alertURL)/alerts/v1"), callback: callback)
     }
     
     /*
@@ -247,13 +280,7 @@ class Alert {
                 self.expired = expired
             }
         } else {
-            self.shortId = "Error"
-            self.what = "Error"
-            self.`where` = "Error"
-            self.severity = .Fatal
-            self.notificationState = .Escalated
-            self.firstOccurrence = Date()
-            self.internalTime = Date()
+            return nil
         }
     }
     
@@ -276,7 +303,7 @@ class Alert {
     }
     
     /*
-     * Class functions.
+     * Class functions and properties.
      */
     
     // Delete an alert.

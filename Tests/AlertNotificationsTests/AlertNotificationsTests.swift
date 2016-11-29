@@ -35,12 +35,21 @@ class AlertNotificationsTests: XCTestCase {
     
     // Ensure that the alert POST function works correctly.
     func testAlertPost() {
-        
+//        let newAlert = Alert(what: "TestWhat", where: "TestWhere", severity: .Fatal, id: "TestID", when: 0, type: .Problem, source: "TestSource", applicationsOrServices: ["TestApps"], URLs: [AlertURL(description: "TestDesc", URL: "TestURL")], details: [Detail(name: "TestName", value: "TestValue")], emailMessageToSend: EmailMessage(subject: "TestSubject", body: "TestBody"), smsMessageToSend: "TestSMS", voiceMessageToSend: "TestVoice")
+//        XCTAssertNotNil(newAlert)
+//        
+//        func testCallback(data: Alert?, error: Error?) {
+//            
+//        }
+//        
+//        let testURL = URL(string: "http://localhost:3000")
+//        newAlert!.post(to: testURL, callback: testCallback)
     }
     
     // Ensure that the alert class GET function works correctly.
     func testAlertGet() {
-        
+        let retrievedAlert = Alert.get(id: "foo")
+        XCTAssertNil(retrievedAlert)
     }
     
     // Ensure that the alert class DELETE function works correctly.
