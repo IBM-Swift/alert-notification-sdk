@@ -54,9 +54,7 @@ class AlertNotificationsTests: XCTestCase {
     
     // Ensure that the alert class DELETE function works correctly.
     func testAlertDelete() {
-        let deletedAlert = Alert.delete(id: "foo")
-        XCTAssertEqual(deletedAlert.statusCode, 204)
-        XCTAssertEqual(deletedAlert.message, "Successful request")
+        
     }
 
     static var allTests : [(String, (AlertNotificationsTests) -> () throws -> Void)] {

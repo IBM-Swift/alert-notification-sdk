@@ -6,6 +6,18 @@
 //
 //
 
+/*
+ * Generic utils.
+ */
+
+enum HTTPMethod: Int {
+    case Get = 0, Post, Delete
+}
+
+/*
+ * Alert-related utils.
+ */
+
 struct AlertURL {
     let description: String
     let URL: String

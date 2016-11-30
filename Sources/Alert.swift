@@ -110,6 +110,7 @@ class Alert {
         
         let session: URLSession = URLSession.shared
         var request: URLRequest = URLRequest(url: alertServerURL!)
+        request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         // If a user and password were not both passed into the function, try to use whatever is stored.
@@ -128,6 +129,7 @@ class Alert {
         }
         request.httpBody = alertData
         let postTask = session.dataTask(with: request) { (data, response, error) in
+            // Possible error #1: no data received.
             if data == nil {
                 let retError = error == nil ? AlertNotificationError.AlertError("Payload from server is empty.") : error
                 if callback != nil {
@@ -140,6 +142,7 @@ class Alert {
                 return
             }
             
+            // Possible error #2: error received.
             if error != nil {
                 if callback != nil {
                     callback!(nil, error)
@@ -148,6 +151,29 @@ class Alert {
                 return
             }
             
+            // Possible error #3: bad response code from the server.
+            if let httpResponse = response as? HTTPURLResponse {
+                var httpError: String? = nil
+                switch httpResponse.statusCode {
+                case 208:
+                    httpError = "This error has already been reported."
+                case 400:
+                    httpError = "The server reported an invalid request."
+                case 415:
+                    httpError = "Invalid media type for alert."
+                default:
+                    break
+                }
+                if httpError != nil {
+                    if callback != nil {
+                        callback!(nil, AlertNotificationError.AlertError(httpError!))
+                    }
+                    Log.error(httpError!)
+                    return
+                }
+            }
+            
+            // Possible error #4: malformed response data.
             guard let alertResponse = Alert(data: data!) else {
                 if callback != nil {
                     callback!(nil, AlertNotificationError.AlertError("Malformed response from server."))
@@ -156,6 +182,7 @@ class Alert {
                 return
             }
             
+            // Finally, perform the callback on the data.
             if callback != nil {
                 callback!(alertResponse, nil)
             }
@@ -306,9 +333,113 @@ class Alert {
      * Class functions and properties.
      */
     
+    // Create a URLRequest with basic authentication.
+    class func createRequest(withMethod method: HTTPMethod, withId id: String? = nil, to alertURL: URL? = nil, user: String? = nil, password: String? = nil) throws -> URLRequest {
+        // Either use the URL passed in as a parameter, or try to use the one pre-supplied in ServerCredentials.
+        var alertServerURL: URL? = alertURL
+        if alertURL == nil {
+            guard let baseURL = ServerCredentials.host else {
+                throw AlertNotificationError.AlertError("No URL provided.")
+            }
+            if method == .Post {
+                alertServerURL = URL(string: "\(baseURL)/alerts/v1")
+            } else if id != nil {
+                alertServerURL = URL(string: "\(baseURL)/alerts/v1/\(id)")
+            } else {
+                throw AlertNotificationError.AlertError("No alert ID was provided for GET or DELETE request.")
+            }
+        }
+        
+        var request: URLRequest = URLRequest(url: alertServerURL!)
+        
+        // If a user and password were not both passed into the function, try to use whatever is stored.
+        if user != nil && password != nil {
+            let rawAuth = "\(user):\(password)"
+            let encodedAuth = rawAuth.data(using: .utf8)!.base64EncodedString()
+            request.setValue("Basic \(encodedAuth)", forHTTPHeaderField: "Authorization")
+        } else if let storedAuthString = ServerCredentials.authString {
+            request.setValue("Basic \(storedAuthString)", forHTTPHeaderField: "Authorization")
+        } else {
+            throw AlertNotificationError.AlertError("No authentication credentials provided.")
+        }
+        
+        return request
+    }
+    
     // Delete an alert.
-    class func delete(id: String) -> (statusCode: Int, message: String) {
-        return (204, "Successful request")
+    class func delete(id: String, to alertURL: URL? = nil, user: String? = nil, password: String? = nil, callback: ((Int?, Error?) -> Void)? = nil) throws -> URLSessionDataTask {
+        // Either use the URL passed in as a parameter, or try to use the one pre-supplied in ServerCredentials.
+        var alertServerURL: URL? = alertURL
+        if alertURL == nil {
+            guard let baseURL = ServerCredentials.host else {
+                throw AlertNotificationError.AlertError("No URL provided.")
+            }
+            alertServerURL = URL(string: "\(baseURL)/alerts/v1/\(id)")
+        }
+        
+        let session: URLSession = URLSession.shared
+        var request: URLRequest = URLRequest(url: alertServerURL!)
+        request.httpMethod = "DELETE"
+        
+        // If a user and password were not both passed into the function, try to use whatever is stored.
+        if user != nil && password != nil {
+            let rawAuth = "\(user):\(password)"
+            let encodedAuth = rawAuth.data(using: .utf8)!.base64EncodedString()
+            request.setValue("Basic \(encodedAuth)", forHTTPHeaderField: "Authorization")
+        } else if let storedAuthString = ServerCredentials.authString {
+            request.setValue("Basic \(storedAuthString)", forHTTPHeaderField: "Authorization")
+        } else {
+            throw AlertNotificationError.AlertError("No authentication credentials provided.")
+        }
+        
+        let deleteTask = session.dataTask(with: request) { (data, response, error) in
+            // Possible error #1: error received.
+            if error != nil {
+                if callback != nil {
+                    callback!(nil, error)
+                }
+                Log.error(error!.localizedDescription)
+                return
+            }
+            
+            // Possible error #2: bad response code from the server.
+            guard let httpResponse = response as? HTTPURLResponse else {
+                if callback != nil {
+                    callback!(nil, AlertNotificationError.AlertError("Could not parse the HTTP response from the server."))
+                }
+                Log.error("Could not parse the HTTP response from the server.")
+                return
+            }
+            var httpError: String? = nil
+            switch httpResponse.statusCode {
+            case 404:
+                httpError = "The alert could not be found."
+            case 500:
+                httpError = "There was an error archiving the alert."
+            default:
+                break
+            }
+            if httpError != nil {
+                if callback != nil {
+                    callback!(httpResponse.statusCode, AlertNotificationError.AlertError(httpError!))
+                }
+                Log.error(httpError!)
+                return
+            }
+            
+            // Finally, perform the callback on the response.
+            if callback != nil {
+                callback!(httpResponse.statusCode, nil)
+            }
+        }
+        
+        deleteTask.resume()
+        return deleteTask
+    }
+    
+    // Delete, with a string URL.
+    class func delete(id: String, to alertURL: String, user: String? = nil, password: String? = nil, callback: ((Int?, Error?) -> Void)? = nil) throws -> URLSessionDataTask {
+        return try Alert.delete(id: id, to: URL(string: "\(alertURL)/alerts/v1/\(id)"), user: user, password: password, callback: callback)
     }
     
     // Get an alert.
