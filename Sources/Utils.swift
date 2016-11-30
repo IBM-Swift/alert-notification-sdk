@@ -10,8 +10,8 @@
  * Generic utils.
  */
 
-enum HTTPMethod: Int {
-    case Get = 0, Post, Delete
+enum HTTPMethod: String {
+    case Get, Post, Delete
 }
 
 /*

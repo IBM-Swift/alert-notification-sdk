@@ -99,30 +99,9 @@ class Alert {
     
     // Create a POST request with this alert.
     func post(to alertURL: URL? = nil, user: String? = nil, password: String? = nil, callback: ((Alert?, Error?) -> Void)? = nil) throws -> URLSessionDataTask? {
-        // Either use the URL passed in as a parameter, or try to use the one pre-supplied in ServerCredentials.
-        var alertServerURL: URL? = alertURL
-        if alertURL == nil {
-            guard let baseURL = ServerCredentials.host else {
-                throw AlertNotificationError.AlertError("No URL provided.")
-            }
-            alertServerURL = URL(string: "\(baseURL)/alerts/v1")
-        }
-        
         let session: URLSession = URLSession.shared
-        var request: URLRequest = URLRequest(url: alertServerURL!)
-        request.httpMethod = "POST"
+        var request: URLRequest = try Alert.createRequest(withMethod: .Post, to: alertURL, user: user, password: password)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        // If a user and password were not both passed into the function, try to use whatever is stored.
-        if user != nil && password != nil {
-            let rawAuth = "\(user):\(password)"
-            let encodedAuth = rawAuth.data(using: .utf8)!.base64EncodedString()
-            request.setValue("Basic \(encodedAuth)", forHTTPHeaderField: "Authorization")
-        } else if let storedAuthString = ServerCredentials.authString {
-            request.setValue("Basic \(storedAuthString)", forHTTPHeaderField: "Authorization")
-        } else {
-            throw AlertNotificationError.AlertError("No authentication credentials provided.")
-        }
         
         guard let alertData = self.postBody() else {
             throw AlertNotificationError.AlertError("Invalid data in alert object.")
@@ -351,6 +330,7 @@ class Alert {
         }
         
         var request: URLRequest = URLRequest(url: alertServerURL!)
+        request.httpMethod = method.rawValue.capitalized
         
         // If a user and password were not both passed into the function, try to use whatever is stored.
         if user != nil && password != nil {
@@ -368,29 +348,8 @@ class Alert {
     
     // Delete an alert.
     class func delete(id: String, to alertURL: URL? = nil, user: String? = nil, password: String? = nil, callback: ((Int?, Error?) -> Void)? = nil) throws -> URLSessionDataTask {
-        // Either use the URL passed in as a parameter, or try to use the one pre-supplied in ServerCredentials.
-        var alertServerURL: URL? = alertURL
-        if alertURL == nil {
-            guard let baseURL = ServerCredentials.host else {
-                throw AlertNotificationError.AlertError("No URL provided.")
-            }
-            alertServerURL = URL(string: "\(baseURL)/alerts/v1/\(id)")
-        }
-        
         let session: URLSession = URLSession.shared
-        var request: URLRequest = URLRequest(url: alertServerURL!)
-        request.httpMethod = "DELETE"
-        
-        // If a user and password were not both passed into the function, try to use whatever is stored.
-        if user != nil && password != nil {
-            let rawAuth = "\(user):\(password)"
-            let encodedAuth = rawAuth.data(using: .utf8)!.base64EncodedString()
-            request.setValue("Basic \(encodedAuth)", forHTTPHeaderField: "Authorization")
-        } else if let storedAuthString = ServerCredentials.authString {
-            request.setValue("Basic \(storedAuthString)", forHTTPHeaderField: "Authorization")
-        } else {
-            throw AlertNotificationError.AlertError("No authentication credentials provided.")
-        }
+        var request = try Alert.createRequest(withMethod: .Delete, withId: id, to: alertURL, user: user, password: password)
         
         let deleteTask = session.dataTask(with: request) { (data, response, error) in
             // Possible error #1: error received.
