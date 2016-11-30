@@ -9,17 +9,19 @@
 import Foundation
 
 struct ServerCredentials {
-    static var host: String? = nil
-    static var user: String? = nil
-    static var password: String? = nil
-    static var authString: String? {
+    let url: String
+    let name: String
+    let password: String
+    var authString: String {
         get {
-            if user == nil || password == nil {
-                return nil
-            } else {
-                let rawString = "\(user):\(password)"
-                return rawString.data(using: .utf8)!.base64EncodedString()
-            }
+            let rawString = "\(name):\(password)"
+            return rawString.data(using: .utf8)!.base64EncodedString()
         }
+    }
+    
+    init(url: String, name: String, password: String) {
+        self.url = url
+        self.name = name
+        self.password = password
     }
 }

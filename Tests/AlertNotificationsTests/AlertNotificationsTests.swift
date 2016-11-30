@@ -48,7 +48,7 @@ class AlertNotificationsTests: XCTestCase {
     
     // Ensure that the alert class GET function works correctly.
     func testAlertGet() {
-        let retrievedAlert = Alert.get(id: "foo")
+        let retrievedAlert = Alert.get(withId: "foo")
         XCTAssertNil(retrievedAlert)
     }
     
