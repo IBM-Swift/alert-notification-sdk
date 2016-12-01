@@ -240,7 +240,7 @@ class Alert {
     }
     
     // Create a POST request with this alert.
-    func post(usingCredentials credentials: ServerCredentials, callback: ((Alert?, Error?) -> Void)? = nil) throws -> URLSessionDataTask? {
+    func post(usingCredentials credentials: ServerCredentials, callback: ((Alert?, Error?) -> Void)? = nil) throws -> URLSessionDataTask {
         let session: URLSession = URLSession.shared
         var request: URLRequest = try Alert.createRequest(withMethod: .Post, usingCredentials: credentials)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
