@@ -40,10 +40,10 @@ class AlertNotificationsTests: XCTestCase {
     }
     
     // Ensure that the Alert object can correctly be written out to a JSON string.
-    func testAlertPostBody() {
+    func testAlertPostBody() throws {
         let newAlert = AlertNotificationsTests.getAlertForTest()
         XCTAssertNotNil(newAlert)
-        let alertBody = newAlert!.postBody()
+        let alertBody = try newAlert!.postBody()
         XCTAssertNotNil(alertBody)
         let alertJsonString = String(data: alertBody!, encoding: .utf8)
         XCTAssertNotNil(alertJsonString)

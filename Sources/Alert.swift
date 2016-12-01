@@ -174,7 +174,7 @@ class Alert {
      */
     
     // Convert this alert's contents to a JSON data object.
-    func postBody() -> Data? {
+    func postBody() throws -> Data? {
         var postDict: Dictionary<String, Any> = Dictionary<String, Any>()
         postDict["What"] = self.what
         postDict["Where"] = self.`where`
@@ -186,7 +186,7 @@ class Alert {
             postDict["ShortId"] = shortId
         }
         if let alertWhen = self.when {
-            postDict["When"] = alertWhen.timeIntervalSince1970 * 1000.0
+            postDict["When"] = Int(alertWhen.timeIntervalSince1970 * 1000.0)
         }
         if let alertType = self.type {
             postDict["Type"] = alertType.rawValue
@@ -236,13 +236,7 @@ class Alert {
             postDict["Expired"] = expired
         }
         
-        do {
-            return try JSONSerialization.data(withJSONObject: postDict, options: [])
-        } catch _ {
-            Log.error("Failed to convert Alert object to JSON.")
-        }
-        
-        return nil
+        return try JSONSerialization.data(withJSONObject: postDict, options: [])
     }
     
     // Create a POST request with this alert.
@@ -251,9 +245,7 @@ class Alert {
         var request: URLRequest = try Alert.createRequest(withMethod: .Post, usingCredentials: credentials)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        guard let alertData = self.postBody() else {
-            throw AlertNotificationError.AlertError("Invalid data in alert object.")
-        }
+        let alertData = try self.postBody()
         request.httpBody = alertData
         let postTask = session.dataTask(with: request) { (data, response, error) in
             // Possible error #1: no data received.
