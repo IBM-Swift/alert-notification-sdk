@@ -53,7 +53,7 @@ class AlertNotificationsTests: XCTestCase {
         XCTAssert(alertJsonString!.contains("\"Where\":\"TestWhere\""))
         XCTAssert(alertJsonString!.contains("\"Severity\":6"))
         XCTAssert(alertJsonString!.contains("\"Identifier\":\"TestID\""))
-        XCTAssert(alertJsonString!.contains("\"When\":\"1969-12-31 18:00:00\""))
+        XCTAssert(alertJsonString!.contains("\"When\":0"))
         XCTAssert(alertJsonString!.contains("\"Type\":\"Problem\""))
         XCTAssert(alertJsonString!.contains("\"Source\":\"TestSource\""))
         XCTAssert(alertJsonString!.contains("\"ApplicationsOrServices\":[\"TestApps\"]"))
@@ -96,7 +96,7 @@ class AlertNotificationsTests: XCTestCase {
         }
         
         waitForExpectations(timeout: 10) { error in
-            if let error = error {
+            if error != nil {
                 XCTFail("waitForExpectations errored: \(error)")
             }
         }
@@ -104,8 +104,31 @@ class AlertNotificationsTests: XCTestCase {
     
     // Ensure that the alert class GET function works correctly.
     func testAlertGet() {
-        let retrievedAlert = Alert.get(shortId: "foo")
-        XCTAssertNil(retrievedAlert)
+        let testExpectation = expectation(description: "Calls a GET request on our small Kitura server.")
+        
+        func testCallback(alert: Alert?, error: Swift.Error?) {
+            if error != nil {
+                XCTFail("GET returned with error: \(error!.localizedDescription)")
+            }
+            XCTAssertNotNil(alert)
+            XCTAssertEqual("TestIDGet", alert!.id)
+            testExpectation.fulfill()
+        }
+        
+        let creds = ServerCredentials(url: "http://localhost:3000", name: "foo", password: "bar")
+        do {
+            let _ = try Alert.get(shortId: "fooId", usingCredentials: creds, callback: testCallback)
+        } catch AlertNotificationError.AlertError(let errorMessage) {
+            XCTFail("GET request failed: \(errorMessage)")
+        } catch _ {
+            XCTFail("GET request failed.")
+        }
+        
+        waitForExpectations(timeout: 10) { error in
+            if error != nil {
+                XCTFail("waitForExpectations errored: \(error)")
+            }
+        }
     }
     
     // Ensure that the alert class DELETE function works correctly.
@@ -131,7 +154,7 @@ class AlertNotificationsTests: XCTestCase {
         }
         
         waitForExpectations(timeout: 10) { error in
-            if let error = error {
+            if error != nil {
                 XCTFail("waitForExpectations errored: \(error)")
             }
         }

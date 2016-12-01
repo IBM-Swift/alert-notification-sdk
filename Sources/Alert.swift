@@ -90,9 +90,10 @@ class Alert {
             }
             if let when = dictionary["When"] as? String {
                 let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
                 self.when = dateFormatter.date(from: when)
             } else if let when = dictionary["When"] as? Int {
-                self.when = Date(timeIntervalSince1970: Double(when) as TimeInterval)
+                self.when = Date(timeIntervalSince1970: (Double(when)/1000.0) as TimeInterval)
             }
             if let type = dictionary["Type"] as? String, let typeValue = AlertType(rawValue: type) {
                 self.type = typeValue
@@ -134,13 +135,13 @@ class Alert {
                 self.notificationState = notValue
             }
             if let firstOccurrence = dictionary["FirstOccurrence"] as? Int {
-                self.firstOccurrence = Date(timeIntervalSince1970: Double(firstOccurrence) as TimeInterval)
+                self.firstOccurrence = Date(timeIntervalSince1970: (Double(firstOccurrence)/1000.0) as TimeInterval)
             }
             if let lastNotified = dictionary["LastNotified"] as? Int {
-                self.lastNotified = Date(timeIntervalSince1970: Double(lastNotified) as TimeInterval)
+                self.lastNotified = Date(timeIntervalSince1970: (Double(lastNotified)/1000.0) as TimeInterval)
             }
             if let internalTime = dictionary["InternalTime"] as? Int {
-                self.internalTime = Date(timeIntervalSince1970: Double(internalTime) as TimeInterval)
+                self.internalTime = Date(timeIntervalSince1970: (Double(internalTime)/1000.0) as TimeInterval)
             }
             if let expired = dictionary["Expired"] as? Bool {
                 self.expired = expired
@@ -150,7 +151,7 @@ class Alert {
         }
     }
     
-    // Alternate option 1: string date.
+    // Alternate option 1: string date with format "yyyy-MM-dd HH:mm:ss".
     convenience init?(what: String, where loc: String, severity: Severity, id: String? = nil, when: String, type: AlertType? = nil, source: String? = nil, applicationsOrServices: [String]? = nil, URLs: [AlertURL]? = nil, details: [Detail]? = nil, emailMessageToSend: EmailMessage? = nil, smsMessageToSend: String? = nil, voiceMessageToSend: String? = nil) {
         
         let dateFormatter = DateFormatter()
@@ -161,10 +162,10 @@ class Alert {
         self.init(what: what, where: loc, severity: severity, id: id, when: date, type: type, source: source, applicationsOrServices: applicationsOrServices, URLs: URLs, details: details, emailMessageToSend: emailMessageToSend, smsMessageToSend: smsMessageToSend, voiceMessageToSend: voiceMessageToSend)
     }
     
-    // Alternate option 2: integer date.
+    // Alternate option 2: integer date in milliseconds since the epoch.
     convenience init?(what: String, where loc: String, severity: Severity, id: String? = nil, when: Int, type: AlertType? = nil, source: String? = nil, applicationsOrServices: [String]? = nil, URLs: [AlertURL]? = nil, details: [Detail]? = nil, emailMessageToSend: EmailMessage? = nil, smsMessageToSend: String? = nil, voiceMessageToSend: String? = nil) {
         
-        let date: Date = Date(timeIntervalSince1970: Double(when) as TimeInterval)
+        let date: Date = Date(timeIntervalSince1970: (Double(when)/1000.0) as TimeInterval)
         self.init(what: what, where: loc, severity: severity, id: id, when: date, type: type, source: source, applicationsOrServices: applicationsOrServices, URLs: URLs, details: details, emailMessageToSend: emailMessageToSend, smsMessageToSend: smsMessageToSend, voiceMessageToSend: voiceMessageToSend)
     }
     
@@ -185,14 +186,7 @@ class Alert {
             postDict["ShortId"] = shortId
         }
         if let alertWhen = self.when {
-            if #available(OSX 10.12, *) {
-                let formatter = ISO8601DateFormatter()
-                postDict["When"] = formatter.string(from: alertWhen)
-            } else {
-                let formatter = DateFormatter()
-                formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-                postDict["When"] = formatter.string(from: alertWhen)
-            }
+            postDict["When"] = alertWhen.timeIntervalSince1970 * 1000.0
         }
         if let alertType = self.type {
             postDict["Type"] = alertType.rawValue
@@ -230,13 +224,13 @@ class Alert {
             postDict["NotificationState"] = notState.rawValue
         }
         if let firstOccurrence = self.firstOccurrence {
-            postDict["FirstOccurrence"] = Int(firstOccurrence.timeIntervalSince1970)
+            postDict["FirstOccurrence"] = Int(firstOccurrence.timeIntervalSince1970 * 1000.0)
         }
         if let lastNotified = self.lastNotified {
-            postDict["LastNotified"] = Int(lastNotified.timeIntervalSince1970)
+            postDict["LastNotified"] = Int(lastNotified.timeIntervalSince1970 * 1000.0)
         }
         if let internalTime = self.internalTime {
-            postDict["InternalTime"] = Int(internalTime.timeIntervalSince1970)
+            postDict["InternalTime"] = Int(internalTime.timeIntervalSince1970 * 1000.0)
         }
         if let expired = self.expired {
             postDict["Expired"] = expired
@@ -409,7 +403,69 @@ class Alert {
     }
     
     // Get an alert.
-    class func get(shortId: String) -> Alert? {
-        return nil
+    class func get(shortId id: String, usingCredentials credentials: ServerCredentials, callback: ((Alert?, Error?) -> Void)? = nil) throws -> URLSessionDataTask {
+        let session: URLSession = URLSession.shared
+        let request = try Alert.createRequest(withMethod: .Get, withId: id, usingCredentials: credentials)
+        
+        let getTask = session.dataTask(with: request) { (data, response, error) in
+            // Possible error #1: no data received.
+            if data == nil {
+                let retError = error == nil ? AlertNotificationError.AlertError("Payload from server is empty.") : error
+                if callback != nil {
+                    callback!(nil, retError)
+                }
+                Log.error("Payload from server is empty.")
+                if error != nil {
+                    Log.error(error!.localizedDescription)
+                }
+                return
+            }
+            
+            // Possible error #2: error received.
+            if error != nil {
+                if callback != nil {
+                    callback!(nil, error)
+                }
+                Log.error(error!.localizedDescription)
+                return
+            }
+            
+            // Possible error #3: bad response code from the server.
+            if let httpResponse = response as? HTTPURLResponse {
+                var httpError: String? = nil
+                switch httpResponse.statusCode {
+                case 401:
+                    httpError = "Authorization is invalid."
+                case 404:
+                    httpError = "An alert matching this short ID could not be found."
+                default:
+                    break
+                }
+                if httpError != nil {
+                    if callback != nil {
+                        callback!(nil, AlertNotificationError.AlertError(httpError!))
+                    }
+                    Log.error(httpError!)
+                    return
+                }
+            }
+            
+            // Possible error #4: malformed response data.
+            guard let alertResponse = Alert(data: data!) else {
+                if callback != nil {
+                    callback!(nil, AlertNotificationError.AlertError("Malformed response from server."))
+                }
+                Log.error("Malformed response from server.")
+                return
+            }
+            
+            // Finally, perform the callback on the data.
+            if callback != nil {
+                callback!(alertResponse, nil)
+            }
+        }
+        
+        getTask.resume()
+        return getTask
     }
 }
