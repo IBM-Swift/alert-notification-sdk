@@ -15,12 +15,10 @@ class AlertNotificationsTests: XCTestCase {
         let router = Router()
         router.get("/:id") { req, res, next in
             let responseAlert = getAlertForTest()
-            responseAlert!.id = "TestIDGet"
             try res.send(data: responseAlert!.postBody()!).end()
         }
         router.post("/") { req, res, next in
             let responseAlert = getAlertForTest()
-            responseAlert!.id = "TestIDPost"
             try res.send(data: responseAlert!.postBody()!).end()
         }
         router.delete("/:id") { req, res, next in
@@ -80,9 +78,10 @@ class AlertNotificationsTests: XCTestCase {
         func testCallback(alert: Alert?, error: Swift.Error?) {
             if error != nil {
                 XCTFail("POST returned with error: \(error!.localizedDescription)")
+            } else {
+                XCTAssertNotNil(alert)
+                XCTAssertEqual("TestID", alert!.id)
             }
-            XCTAssertNotNil(alert)
-            XCTAssertEqual("TestIDPost", alert!.id)
             testExpectation.fulfill()
         }
         
@@ -107,9 +106,10 @@ class AlertNotificationsTests: XCTestCase {
         func testCallback(alert: Alert?, error: Swift.Error?) {
             if error != nil {
                 XCTFail("GET returned with error: \(error!.localizedDescription)")
+            } else {
+                XCTAssertNotNil(alert)
+                XCTAssertEqual("TestID", alert!.id)
             }
-            XCTAssertNotNil(alert)
-            XCTAssertEqual("TestIDGet", alert!.id)
             testExpectation.fulfill()
         }
         
@@ -134,9 +134,10 @@ class AlertNotificationsTests: XCTestCase {
         func testCallback(statusCode: Int?, error: Swift.Error?) {
             if error != nil {
                 XCTFail("DELETE returned with error: \(error!.localizedDescription)")
+            } else {
+                XCTAssertNotNil(statusCode)
+                XCTAssertEqual(statusCode, 204)
             }
-            XCTAssertNotNil(statusCode)
-            XCTAssertEqual(statusCode, 204)
             testExpectation.fulfill()
         }
         
