@@ -1,10 +1,47 @@
 import XCTest
+import Kitura
+import KituraNet
 @testable import AlertNotifications
 
 class AlertNotificationsTests: XCTestCase {
+    // Get a generic alert.
+    class func getAlertForTest() -> Alert? {
+        return Alert(what: "TestWhat", where: "TestWhere", severity: .Fatal, id: "TestID", when: 0, type: .Problem, source: "TestSource", applicationsOrServices: ["TestApps"], URLs: [AlertURL(description: "TestDesc", URL: "TestURL")], details: [Detail(name: "TestName", value: "TestValue")], emailMessageToSend: EmailMessage(subject: "TestSubject", body: "TestBody"), smsMessageToSend: "TestSMS", voiceMessageToSend: "TestVoice")
+    }
+    
+    override class func setUp() {
+        super.setUp()
+        
+        let router = Router()
+        router.get("/:id") { req, res, next in
+            let responseAlert = getAlertForTest()
+            responseAlert!.id = "TestIDGet"
+            try res.send(data: responseAlert!.postBody()!).end()
+        }
+        router.post("/") { req, res, next in
+            let responseAlert = getAlertForTest()
+            responseAlert!.id = "TestIDPost"
+            try res.send(data: responseAlert!.postBody()!).end()
+        }
+        router.delete("/:id") { req, res, next in
+            res.statusCode = HTTPStatusCode.noContent
+            try res.send("Successful request").end()
+        }
+        
+        Kitura.addHTTPServer(onPort: 3000, with: router)
+        
+        Kitura.start()
+    }
+    
+    override class func tearDown() {
+        super.tearDown()
+        
+        Kitura.stop()
+    }
+    
     // Ensure that the Alert object can correctly be written out to a JSON string.
     func testAlertPostBody() {
-        let newAlert = Alert(what: "TestWhat", where: "TestWhere", severity: .Fatal, id: "TestID", when: 0, type: .Problem, source: "TestSource", applicationsOrServices: ["TestApps"], URLs: [AlertURL(description: "TestDesc", URL: "TestURL")], details: [Detail(name: "TestName", value: "TestValue")], emailMessageToSend: EmailMessage(subject: "TestSubject", body: "TestBody"), smsMessageToSend: "TestSMS", voiceMessageToSend: "TestVoice")
+        let newAlert = AlertNotificationsTests.getAlertForTest()
         XCTAssertNotNil(newAlert)
         let alertBody = newAlert!.postBody()
         XCTAssertNotNil(alertBody)
@@ -35,26 +72,69 @@ class AlertNotificationsTests: XCTestCase {
     
     // Ensure that the alert POST function works correctly.
     func testAlertPost() {
-//        let newAlert = Alert(what: "TestWhat", where: "TestWhere", severity: .Fatal, id: "TestID", when: 0, type: .Problem, source: "TestSource", applicationsOrServices: ["TestApps"], URLs: [AlertURL(description: "TestDesc", URL: "TestURL")], details: [Detail(name: "TestName", value: "TestValue")], emailMessageToSend: EmailMessage(subject: "TestSubject", body: "TestBody"), smsMessageToSend: "TestSMS", voiceMessageToSend: "TestVoice")
-//        XCTAssertNotNil(newAlert)
-//        
-//        func testCallback(data: Alert?, error: Error?) {
-//            
-//        }
-//        
-//        let testURL = URL(string: "http://localhost:3000")
-//        newAlert!.post(to: testURL, callback: testCallback)
+        let testExpectation = expectation(description: "Calls a POST request on our small Kitura server.")
+        
+        let newAlert = AlertNotificationsTests.getAlertForTest()
+        XCTAssertNotNil(newAlert)
+        
+        func testCallback(alert: Alert?, error: Swift.Error?) {
+            if error != nil {
+                XCTFail("POST returned with error: \(error!.localizedDescription)")
+            }
+            XCTAssertNotNil(alert)
+            XCTAssertEqual("TestIDPost", alert!.id)
+            testExpectation.fulfill()
+        }
+        
+        let creds = ServerCredentials(url: "http://localhost:3000", name: "foo", password: "bar")
+        do {
+            let _ = try newAlert!.post(usingCredentials: creds, callback: testCallback)
+        } catch AlertNotificationError.AlertError(let errorMessage) {
+            XCTFail("POST request failed: \(errorMessage)")
+        } catch _ {
+            XCTFail("Post request failed.")
+        }
+        
+        waitForExpectations(timeout: 10) { error in
+            if let error = error {
+                XCTFail("waitForExpectations errored: \(error)")
+            }
+        }
     }
     
     // Ensure that the alert class GET function works correctly.
     func testAlertGet() {
-        let retrievedAlert = Alert.get(withId: "foo")
+        let retrievedAlert = Alert.get(shortId: "foo")
         XCTAssertNil(retrievedAlert)
     }
     
     // Ensure that the alert class DELETE function works correctly.
     func testAlertDelete() {
+        let testExpectation = expectation(description: "Calls a DELETE request on our small Kitura server.")
         
+        func testCallback(statusCode: Int?, error: Swift.Error?) {
+            if error != nil {
+                XCTFail("DELETE returned with error: \(error!.localizedDescription)")
+            }
+            XCTAssertNotNil(statusCode)
+            XCTAssertEqual(statusCode, 204)
+            testExpectation.fulfill()
+        }
+        
+        let creds = ServerCredentials(url: "http://localhost:3000", name: "foo", password: "bar")
+        do {
+            let _ = try Alert.delete(shortId: "fooId", usingCredentials: creds, callback: testCallback)
+        } catch AlertNotificationError.AlertError(let errorMessage) {
+            XCTFail("DELETE request failed: \(errorMessage)")
+        } catch _ {
+            XCTFail("DELETE request failed.")
+        }
+        
+        waitForExpectations(timeout: 10) { error in
+            if let error = error {
+                XCTFail("waitForExpectations errored: \(error)")
+            }
+        }
     }
 
     static var allTests : [(String, (AlertNotificationsTests) -> () throws -> Void)] {
