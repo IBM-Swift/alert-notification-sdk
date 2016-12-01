@@ -71,7 +71,7 @@ class AlertNotificationsTests: XCTestCase {
     }
     
     // Ensure that the alert POST function works correctly.
-    func testAlertPost() {
+    func testAlertPost() throws {
         let testExpectation = expectation(description: "Calls a POST request on our small Kitura server.")
         
         let newAlert = AlertNotificationsTests.getAlertForTest()
@@ -91,8 +91,6 @@ class AlertNotificationsTests: XCTestCase {
             let _ = try newAlert!.post(usingCredentials: creds, callback: testCallback)
         } catch AlertNotificationError.AlertError(let errorMessage) {
             XCTFail("POST request failed: \(errorMessage)")
-        } catch _ {
-            XCTFail("Post request failed.")
         }
         
         waitForExpectations(timeout: 10) { error in
@@ -103,7 +101,7 @@ class AlertNotificationsTests: XCTestCase {
     }
     
     // Ensure that the alert class GET function works correctly.
-    func testAlertGet() {
+    func testAlertGet() throws {
         let testExpectation = expectation(description: "Calls a GET request on our small Kitura server.")
         
         func testCallback(alert: Alert?, error: Swift.Error?) {
@@ -120,8 +118,6 @@ class AlertNotificationsTests: XCTestCase {
             let _ = try Alert.get(shortId: "fooId", usingCredentials: creds, callback: testCallback)
         } catch AlertNotificationError.AlertError(let errorMessage) {
             XCTFail("GET request failed: \(errorMessage)")
-        } catch _ {
-            XCTFail("GET request failed.")
         }
         
         waitForExpectations(timeout: 10) { error in
@@ -132,7 +128,7 @@ class AlertNotificationsTests: XCTestCase {
     }
     
     // Ensure that the alert class DELETE function works correctly.
-    func testAlertDelete() {
+    func testAlertDelete() throws {
         let testExpectation = expectation(description: "Calls a DELETE request on our small Kitura server.")
         
         func testCallback(statusCode: Int?, error: Swift.Error?) {
@@ -149,8 +145,6 @@ class AlertNotificationsTests: XCTestCase {
             let _ = try Alert.delete(shortId: "fooId", usingCredentials: creds, callback: testCallback)
         } catch AlertNotificationError.AlertError(let errorMessage) {
             XCTFail("DELETE request failed: \(errorMessage)")
-        } catch _ {
-            XCTFail("DELETE request failed.")
         }
         
         waitForExpectations(timeout: 10) { error in
