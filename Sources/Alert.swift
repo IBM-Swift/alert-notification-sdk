@@ -319,7 +319,7 @@ class Alert {
     
     // Create a URLRequest with basic authentication.
     class func createRequest(withMethod method: HTTPMethod, withId id: String? = nil, usingCredentials credentials: ServerCredentials) throws -> URLRequest {
-        guard let baseURL = URL(string: credentials.url) else {
+        guard let baseURL = URL(string: "\(credentials.url)/") else {
             throw AlertNotificationError.AlertError("Invalid URL provided.")
         }
         
