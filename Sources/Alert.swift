@@ -241,18 +241,23 @@ class Alert {
     
     // Create a POST request with this alert.
     func post(usingCredentials credentials: ServerCredentials, callback: ((Alert?, Error?) -> Void)? = nil) throws -> URLSessionDataTask {
-        let session: URLSession = URLSession.shared
+        let session: URLSession = createSession()
         var request: URLRequest = try Alert.createRequest(withMethod: .Post, usingCredentials: credentials)
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
         
         let alertData = try self.postBody()
         request.httpBody = alertData
+        print("\(request.allHTTPHeaderFields)")
         let postTask = session.dataTask(with: request) { (data, response, error) in
+            print("\(response)")
             // Possible error #1: no data received.
             if data == nil {
-                let retError = error == nil ? AlertNotificationError.AlertError("Payload from server is empty.") : error
                 if callback != nil {
-                    callback!(nil, retError)
+                    if error == nil {
+                        callback!(nil, AlertNotificationError.HTTPError("Payload from server is empty."))
+                    } else {
+                        callback!(nil, error)
+                    }
                 }
                 Log.error("Payload from server is empty.")
                 if error != nil {
@@ -287,7 +292,7 @@ class Alert {
                 }
                 if httpError != nil {
                     if callback != nil {
-                        callback!(nil, AlertNotificationError.AlertError(httpError!))
+                        callback!(nil, AlertNotificationError.HTTPError(httpError!))
                     }
                     Log.error(httpError!)
                     return
@@ -297,7 +302,7 @@ class Alert {
             // Possible error #4: malformed response data.
             guard let alertResponse = Alert(data: data!) else {
                 if callback != nil {
-                    callback!(nil, AlertNotificationError.AlertError("Malformed response from server."))
+                    callback!(nil, AlertNotificationError.HTTPError("Malformed response from server."))
                 }
                 Log.error("Malformed response from server.")
                 return
@@ -344,7 +349,7 @@ class Alert {
     
     // Delete an alert.
     class func delete(shortId id: String, usingCredentials credentials: ServerCredentials, callback: ((Int?, Error?) -> Void)? = nil) throws -> URLSessionDataTask {
-        let session: URLSession = URLSession.shared
+        let session: URLSession = createSession()
         let request = try Alert.createRequest(withMethod: .Delete, withId: id, usingCredentials: credentials)
         
         let deleteTask = session.dataTask(with: request) { (data, response, error) in
@@ -360,7 +365,7 @@ class Alert {
             // Possible error #2: bad response code from the server.
             guard let httpResponse = response as? HTTPURLResponse else {
                 if callback != nil {
-                    callback!(nil, AlertNotificationError.AlertError("Could not parse the HTTP response from the server."))
+                    callback!(nil, AlertNotificationError.HTTPError("Could not parse the HTTP response from the server."))
                 }
                 Log.error("Could not parse the HTTP response from the server.")
                 return
@@ -378,7 +383,7 @@ class Alert {
             }
             if httpError != nil {
                 if callback != nil {
-                    callback!(httpResponse.statusCode, AlertNotificationError.AlertError(httpError!))
+                    callback!(httpResponse.statusCode, AlertNotificationError.HTTPError(httpError!))
                 }
                 Log.error(httpError!)
                 return
@@ -396,15 +401,18 @@ class Alert {
     
     // Get an alert.
     class func get(shortId id: String, usingCredentials credentials: ServerCredentials, callback: ((Alert?, Error?) -> Void)? = nil) throws -> URLSessionDataTask {
-        let session: URLSession = URLSession.shared
+        let session: URLSession = createSession()
         let request = try Alert.createRequest(withMethod: .Get, withId: id, usingCredentials: credentials)
         
         let getTask = session.dataTask(with: request) { (data, response, error) in
             // Possible error #1: no data received.
             if data == nil {
-                let retError = error == nil ? AlertNotificationError.AlertError("Payload from server is empty.") : error
                 if callback != nil {
-                    callback!(nil, retError)
+                    if error == nil {
+                        callback!(nil, AlertNotificationError.HTTPError("Payload from server is empty."))
+                    } else {
+                        callback!(nil, error)
+                    }
                 }
                 Log.error("Payload from server is empty.")
                 if error != nil {
@@ -435,7 +443,7 @@ class Alert {
                 }
                 if httpError != nil {
                     if callback != nil {
-                        callback!(nil, AlertNotificationError.AlertError(httpError!))
+                        callback!(nil, AlertNotificationError.HTTPError(httpError!))
                     }
                     Log.error(httpError!)
                     return
@@ -445,7 +453,7 @@ class Alert {
             // Possible error #4: malformed response data.
             guard let alertResponse = Alert(data: data!) else {
                 if callback != nil {
-                    callback!(nil, AlertNotificationError.AlertError("Malformed response from server."))
+                    callback!(nil, AlertNotificationError.HTTPError("Malformed response from server."))
                 }
                 Log.error("Malformed response from server.")
                 return

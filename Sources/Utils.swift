@@ -6,12 +6,23 @@
 //
 //
 
+import Foundation
+
 /*
  * Generic utils.
  */
 
 enum HTTPMethod: String {
     case Get, Post, Delete
+}
+
+enum RequestType: String {
+    case Alert, Message
+}
+
+func createSession() -> URLSession {
+    let basicConfig = URLSessionConfiguration.`default`
+    return URLSession(configuration: basicConfig)
 }
 
 /*
@@ -60,6 +71,7 @@ enum NotificationState: String {
 enum AlertNotificationError: Error {
     case AlertError(String)
     case MessageError(String)
+    case HTTPError(String)
 }
 
 func getSeverity(from str: String) -> Severity? {
