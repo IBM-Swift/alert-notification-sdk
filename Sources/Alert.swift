@@ -240,15 +240,11 @@ class Alert {
     }
     
     // Create a POST request with this alert.
-    func post(usingCredentials credentials: ServerCredentials, callback: ((Alert?, Error?) -> Void)? = nil) throws -> URLSessionDataTask {
-        let session: URLSession = createSession()
-        var request: URLRequest = try Alert.createRequest(withMethod: .Post, usingCredentials: credentials)
-        request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
-        
-        let alertData = try self.postBody()
-        request.httpBody = alertData
-        print("\(request.allHTTPHeaderFields)")
-        let postTask = session.dataTask(with: request) { (data, response, error) in
+    func post(usingCredentials credentials: ServerCredentials, callback: ((Alert?, Error?) -> Void)? = nil) throws {
+        guard let bluemixRequest = BluemixRequest(type: .Alert, usingCredentials: credentials) else {
+            throw AlertNotificationError.AlertError("Invalid URL provided.")
+        }
+        try bluemixRequest.postAlert(self) { (data, response, error) in
             print("\(response)")
             // Possible error #1: no data received.
             if data == nil {
@@ -313,47 +309,18 @@ class Alert {
                 callback!(alertResponse, nil)
             }
         }
-        
-        postTask.resume()
-        session.finishTasksAndInvalidate()
-        return postTask
     }
     
     /*
      * Class functions and properties.
      */
     
-    // Create a URLRequest with basic authentication.
-    class func createRequest(withMethod method: HTTPMethod, withId id: String? = nil, usingCredentials credentials: ServerCredentials) throws -> URLRequest {
-        guard let baseURL = URL(string: "\(credentials.url)/") else {
+    // Delete an alert.
+    class func delete(shortId id: String, usingCredentials credentials: ServerCredentials, callback: ((Int?, Error?) -> Void)? = nil) throws {
+        guard let bluemixRequest = BluemixRequest(type: .Alert, usingCredentials: credentials) else {
             throw AlertNotificationError.AlertError("Invalid URL provided.")
         }
-        
-        var request: URLRequest
-        // Convert the host URL into the one that will be used for the request, if necessary.
-        if method == .Post {
-            request = URLRequest(url: baseURL)
-        } else if id != nil {
-            guard let requestURL: URL = URL(string: id!, relativeTo: baseURL) else {
-                throw AlertNotificationError.AlertError("Invalid alert ID provided.")
-            }
-            request = URLRequest(url: requestURL)
-        } else {
-            throw AlertNotificationError.AlertError("No alert ID was provided for GET or DELETE request.")
-        }
-        
-        request.httpMethod = method.rawValue.capitalized
-        request.setValue("Basic \(credentials.authString)", forHTTPHeaderField: "Authorization")
-        
-        return request
-    }
-    
-    // Delete an alert.
-    class func delete(shortId id: String, usingCredentials credentials: ServerCredentials, callback: ((Int?, Error?) -> Void)? = nil) throws -> URLSessionDataTask {
-        let session: URLSession = createSession()
-        let request = try Alert.createRequest(withMethod: .Delete, withId: id, usingCredentials: credentials)
-        
-        let deleteTask = session.dataTask(with: request) { (data, response, error) in
+        try bluemixRequest.deleteAlert(shortId: id) { (data, response, error) in
             // Possible error #1: error received.
             if error != nil {
                 if callback != nil {
@@ -395,18 +362,14 @@ class Alert {
                 callback!(httpResponse.statusCode, nil)
             }
         }
-        
-        deleteTask.resume()
-        session.finishTasksAndInvalidate()
-        return deleteTask
     }
     
     // Get an alert.
-    class func get(shortId id: String, usingCredentials credentials: ServerCredentials, callback: ((Alert?, Error?) -> Void)? = nil) throws -> URLSessionDataTask {
-        let session: URLSession = createSession()
-        let request = try Alert.createRequest(withMethod: .Get, withId: id, usingCredentials: credentials)
-        
-        let getTask = session.dataTask(with: request) { (data, response, error) in
+    class func get(shortId id: String, usingCredentials credentials: ServerCredentials, callback: ((Alert?, Error?) -> Void)? = nil) throws {
+        guard let bluemixRequest = BluemixRequest(type: .Alert, usingCredentials: credentials) else {
+            throw AlertNotificationError.AlertError("Invalid URL provided.")
+        }
+        try bluemixRequest.getAlert(shortId: id) { (data, response, error) in
             // Possible error #1: no data received.
             if data == nil {
                 if callback != nil {
@@ -466,9 +429,5 @@ class Alert {
                 callback!(alertResponse, nil)
             }
         }
-        
-        getTask.resume()
-        session.finishTasksAndInvalidate()
-        return getTask
     }
 }

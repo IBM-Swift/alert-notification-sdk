@@ -12,10 +12,6 @@ import Foundation
  * Generic utils.
  */
 
-enum HTTPMethod: String {
-    case Get, Post, Delete
-}
-
 enum RequestType: String {
     case Alert, Message
 }
