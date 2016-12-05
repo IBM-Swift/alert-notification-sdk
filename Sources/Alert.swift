@@ -315,6 +315,7 @@ class Alert {
         }
         
         postTask.resume()
+        session.finishTasksAndInvalidate()
         return postTask
     }
     
@@ -396,6 +397,7 @@ class Alert {
         }
         
         deleteTask.resume()
+        session.finishTasksAndInvalidate()
         return deleteTask
     }
     
@@ -466,6 +468,7 @@ class Alert {
         }
         
         getTask.resume()
+        session.finishTasksAndInvalidate()
         return getTask
     }
 }
