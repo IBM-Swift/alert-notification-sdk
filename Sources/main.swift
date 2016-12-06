@@ -49,19 +49,30 @@ func testDeleteCallback(statusCode: Int?, error: Error?) {
 
 print("Go")
 
-let creds = ServerCredentials(url: "https://ibmnotifybm.mybluemix.net/api", name: "37921d79-f951-41ab-ae96-2144636d6852/0dc957dd-e500-4a27-8e45-6f856feb4d36", password: "QfkE673GZO+1X2MfUrYRdXTVenEgU2X6")
-let testAlert = Alert(what: "Sample", where: "SampleWhere", severity: .Indeterminate, id: "Experimental")
-print(testAlert)
+let testAlert = try Alert.Builder().what("Sample").where("SampleWhere").severity(.Indeterminate).id("Experimental").build()
+print(testAlert.what)
+print(testAlert.`where`)
+print(testAlert.severity)
+print(testAlert.id)
+let testAlert2 = try Alert.Builder(from: testAlert).what("Sample2").build()
+print(testAlert2.what)
+print(testAlert2.`where`)
+print(testAlert2.severity)
+print(testAlert2.id)
+
+//let creds = ServerCredentials(url: "https://ibmnotifybm.mybluemix.net/api", name: "37921d79-f951-41ab-ae96-2144636d6852/0dc957dd-e500-4a27-8e45-6f856feb4d36", password: "QfkE673GZO+1X2MfUrYRdXTVenEgU2X6")
+//let testAlert = Alert(what: "Sample", where: "SampleWhere", severity: .Indeterminate, id: "Experimental")
+//print(testAlert)
 
 //let _ = try testAlert.post(usingCredentials: creds, callback: testPostCallback)
 //
 //while allFinished != true {}
 
-allFinished = false
-
-let _ = try Alert.get(shortId: "14-3", usingCredentials: creds, callback: testGetCallback)
-
-while allFinished != true {}
+//allFinished = false
+//
+//let _ = try Alert.get(shortId: "14-3", usingCredentials: creds, callback: testGetCallback)
+//
+//while allFinished != true {}
 
 //allFinished = false
 //

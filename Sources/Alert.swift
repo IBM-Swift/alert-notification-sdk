@@ -15,26 +15,153 @@ class Alert {
      * Instance variables.
      */
     
+    // Required variables.
     let what: String
     let `where`: String
     let severity: Severity
     
-    var id: String?
-    var shortId: String? = nil
-    var when: Date?
-    var type: AlertType?
-    var source: String?
-    var applicationsOrServices: [String]?
-    var URLs: [AlertURL]?
-    var details: [Detail]?
-    var emailMessageToSend: EmailMessage?
-    var smsMessageToSend: String?
-    var voiceMessageToSend: String?
-    var notificationState: NotificationState? = nil
-    var firstOccurrence: Date? = nil
-    var lastNotified: Date? = nil
-    var internalTime: Date? = nil
-    var expired: Bool? = nil
+    // Optional variables.
+    private(set) var id: String?
+    private(set) var shortId: String?
+    private(set) var when: Date?
+    private(set) var type: AlertType?
+    private(set) var source: String?
+    private(set) var applicationsOrServices: [String]?
+    private(set) var URLs: [AlertURL]?
+    private(set) var details: [Detail]?
+    private(set) var emailMessageToSend: EmailMessage?
+    private(set) var smsMessageToSend: String?
+    private(set) var voiceMessageToSend: String?
+    private(set) var notificationState: NotificationState?
+    private(set) var firstOccurrence: Date?
+    private(set) var lastNotified: Date?
+    private(set) var internalTime: Date?
+    private(set) var expired: Bool?
+    
+    /*
+     * Builder.
+     */
+    class Builder {
+        var _what: String?
+        var _where: String?
+        var _severity: Severity?
+        var _id: String?
+        var _when: Date?
+        var _type: AlertType?
+        var _source: String?
+        var _applicationsOrServices: [String]?
+        var _URLs: [AlertURL]?
+        var _details: [Detail]?
+        var _emailMessageToSend: EmailMessage?
+        var _smsMessageToSend: String?
+        var _voiceMessageToSend: String?
+        
+        init() {
+            
+        }
+        
+        init(from alert: Alert) {
+            self._what = alert.what
+            self._where = alert.`where`
+            self._severity = alert.severity
+            self._id = alert.id
+            self._when = alert.when
+            self._type = alert.type
+            self._source = alert.source
+            self._applicationsOrServices = alert.applicationsOrServices
+            self._URLs = alert.URLs
+            self._details = alert.details
+            self._emailMessageToSend = alert.emailMessageToSend
+            self._smsMessageToSend = alert.smsMessageToSend
+            self._voiceMessageToSend = alert.voiceMessageToSend
+        }
+        
+        func what(_ _what: String) -> Builder {
+            self._what = _what
+            return self
+        }
+        
+        func `where`(_ _where: String) -> Builder {
+            self._where = _where
+            return self
+        }
+        
+        func severity(_ _severity: Severity) -> Builder {
+            self._severity = _severity
+            return self
+        }
+        
+        func id(_ _id: String) -> Builder {
+            self._id = _id
+            return self
+        }
+        
+        func when(_ _when: Date) -> Builder {
+            self._when = _when
+            return self
+        }
+        
+        func when(_ _when: String) throws -> Builder {
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+            guard let date: Date = dateFormatter.date(from: _when) else {
+                throw AlertNotificationError.AlertError("Invalid String format for variable \"when\". Correct format is yyyy-MM-dd HH:mm:ss")
+            }
+            return self.when(date)
+        }
+        
+        func when(_ _when: Int) -> Builder {
+            let date: Date = Date(timeIntervalSince1970: (Double(_when)/1000.0) as TimeInterval)
+            return self.when(date)
+        }
+        
+        func type(_ _type: AlertType) -> Builder {
+            self._type = _type
+            return self
+        }
+        
+        func source(_ _source: String) -> Builder {
+            self._source = _source
+            return self
+        }
+        
+        func applicationsOrServices(_ _apps: [String]) -> Builder {
+            self._applicationsOrServices = _apps
+            return self
+        }
+        
+        func URLs(_ _URLs: [AlertURL]) -> Builder {
+            self._URLs = _URLs
+            return self
+        }
+        
+        func details(_ _details: [Detail]) -> Builder {
+            self._details = _details
+            return self
+        }
+        
+        func emailMessageToSend(_ _email: EmailMessage) -> Builder {
+            self._emailMessageToSend = _email
+            return self
+        }
+        
+        func smsMessageToSend(_ _sms: String) -> Builder {
+            self._smsMessageToSend = _sms
+            return self
+        }
+        
+        func voiceMessageToSend(_ _voice: String) -> Builder {
+            self._voiceMessageToSend = _voice
+            return self
+        }
+        
+        func build() throws -> Alert {
+            guard let what = self._what, let `where` = self._where, let severity = self._severity else {
+                throw AlertNotificationError.AlertError("Cannot build Alert object without values for variables \"what\", \"where\" and \"severity\".")
+            }
+            return Alert(what: what, where: `where`, severity: severity, id: self._id, when: self._when, type: self._type, source: self._source, applicationsOrServices: self._applicationsOrServices, URLs: self._URLs, details: self._details, emailMessageToSend: self._emailMessageToSend, smsMessageToSend: self._smsMessageToSend, voiceMessageToSend: self._voiceMessageToSend)
+        }
+    }
     
     /*
      * Initializers.
@@ -149,24 +276,6 @@ class Alert {
         } else {
             return nil
         }
-    }
-    
-    // Alternate option 1: string date with format "yyyy-MM-dd HH:mm:ss".
-    convenience init?(what: String, where loc: String, severity: Severity, id: String? = nil, when: String, type: AlertType? = nil, source: String? = nil, applicationsOrServices: [String]? = nil, URLs: [AlertURL]? = nil, details: [Detail]? = nil, emailMessageToSend: EmailMessage? = nil, smsMessageToSend: String? = nil, voiceMessageToSend: String? = nil) {
-        
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        guard let date: Date = dateFormatter.date(from: when) else {
-            return nil
-        }
-        self.init(what: what, where: loc, severity: severity, id: id, when: date, type: type, source: source, applicationsOrServices: applicationsOrServices, URLs: URLs, details: details, emailMessageToSend: emailMessageToSend, smsMessageToSend: smsMessageToSend, voiceMessageToSend: voiceMessageToSend)
-    }
-    
-    // Alternate option 2: integer date in milliseconds since the epoch.
-    convenience init?(what: String, where loc: String, severity: Severity, id: String? = nil, when: Int, type: AlertType? = nil, source: String? = nil, applicationsOrServices: [String]? = nil, URLs: [AlertURL]? = nil, details: [Detail]? = nil, emailMessageToSend: EmailMessage? = nil, smsMessageToSend: String? = nil, voiceMessageToSend: String? = nil) {
-        
-        let date: Date = Date(timeIntervalSince1970: (Double(when)/1000.0) as TimeInterval)
-        self.init(what: what, where: loc, severity: severity, id: id, when: date, type: type, source: source, applicationsOrServices: applicationsOrServices, URLs: URLs, details: details, emailMessageToSend: emailMessageToSend, smsMessageToSend: smsMessageToSend, voiceMessageToSend: voiceMessageToSend)
     }
     
     /*
