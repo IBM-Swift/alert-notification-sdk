@@ -24,11 +24,6 @@ class BluemixRequest {
     let baseURL: URL
     let credentials: ServerCredentials
     
-    // URLSession variables.
-    var sessionRequest: URLRequest?
-    
-    // KituraNet variables.
-    
     // Initializer.
     init?(type: RequestType, usingCredentials credentials: ServerCredentials) {
         self.type = type
@@ -41,7 +36,53 @@ class BluemixRequest {
         self.baseURL = baseURL
     }
     
-    // Submit KituraNet request.
+    // Convert a Kitura response to a HTTPURLResponse.
+    func convertResponse(_ response: ClientResponse?) -> HTTPURLResponse? {
+        if response == nil {
+            return nil
+        }
+        
+        guard let httpResponse = HTTPURLResponse(url: response!.urlComponents.url!, statusCode: response!.status, httpVersion: "HTTP/\(response!.httpVersionMajor).\(response!.httpVersionMinor)", headerFields: nil) else {
+            return nil
+        }
+        
+        return httpResponse
+    }
+    
+    // Create KituraNet request.
+    func createKituraNetRequest(to baseURL: URL, withMethod method: String, forID id: String? = nil, usingCredentials credentials: ServerCredentials, callback: ((Data?, URLResponse?, Swift.Error?) -> Void)? = nil) throws -> ClientRequest {
+        let requestURL: URL? = id != nil ? URL(string: id!, relativeTo: baseURL) : baseURL
+        if requestURL == nil {
+            throw AlertNotificationError.AlertError("Invalid alert ID provided to \(method) request.")
+        }
+        
+        guard let urlComponents = URLComponents(string: requestURL!.absoluteString), let host = urlComponents.host, let schema = urlComponents.scheme else {
+            throw AlertNotificationError.AlertError("Invalid URL provided.")
+        }
+        var headers = ["Authorization": "Basic \(credentials.authString)"]
+        if method == "POST" {
+            headers["Content-Type"] = "application/json; charset=utf-8"
+        }
+        
+        let clientCallback: ClientRequest.Callback = { (response: ClientResponse?) in
+            let httpResponse = self.convertResponse(response)
+            do {
+                let dataString = try response?.readString()
+                let responseData = dataString != nil ? dataString!.data(using: String.Encoding.utf8) : nil
+                if callback != nil {
+                    callback!(responseData, httpResponse, nil)
+                }
+            } catch {
+                Log.error(error.localizedDescription)
+                if callback != nil {
+                    callback!(nil, httpResponse, error)
+                }
+            }
+        }
+        
+        let options: [ClientRequest.Options] = [.method(method), .hostname(host), .path(urlComponents.path), .schema(schema), .headers(headers)]
+        return HTTP.request(options, callback: clientCallback)
+    }
     
     // Submit URLSession request.
     func sendRequest(req: URLRequest, callback: ((Data?, URLResponse?, Swift.Error?) -> Void)? = nil) {
@@ -61,7 +102,11 @@ class BluemixRequest {
     
     func postAlert(_ alert: Alert, callback: ((Data?, URLResponse?, Swift.Error?) -> Void)? = nil) throws {
         if self.USE_KITURA_NET {
+            let req: ClientRequest = try self.createKituraNetRequest(to: self.baseURL, withMethod: "POST", usingCredentials: credentials, callback: callback)
             
+            let alertBody = try alert.postBody()
+            req.write(from: alertBody!)
+            req.end()
         } else {
             var request: URLRequest = URLRequest(url: self.baseURL)
             request.httpMethod = "POST"
@@ -77,7 +122,8 @@ class BluemixRequest {
     
     func getAlert(shortId id: String, callback: ((Data?, URLResponse?, Swift.Error?) -> Void)? = nil) throws {
         if self.USE_KITURA_NET {
-            
+            let req: ClientRequest = try self.createKituraNetRequest(to: self.baseURL, withMethod: "GET", forID: id, usingCredentials: credentials, callback: callback)
+            req.end()
         } else {
             guard let fullUrl: URL = URL(string: id, relativeTo: self.baseURL) else {
                 throw AlertNotificationError.AlertError("Invalid alert ID provided to GET request.")
@@ -92,7 +138,8 @@ class BluemixRequest {
     
     func deleteAlert(shortId id: String, callback: ((Data?, URLResponse?, Swift.Error?) -> Void)? = nil) throws {
         if self.USE_KITURA_NET {
-            
+            let req: ClientRequest = try self.createKituraNetRequest(to: self.baseURL, withMethod: "DELETE", forID: id, usingCredentials: credentials, callback: callback)
+            req.end()
         } else {
             guard let fullUrl: URL = URL(string: id, relativeTo: self.baseURL) else {
                 throw AlertNotificationError.AlertError("Invalid alert ID provided to DELETE request.")
@@ -118,6 +165,10 @@ class BluemixRequest {
     }
     
     func getMessage(shortId id: String, callback: ((Data?, URLResponse?, Swift.Error?) -> Void)? = nil) throws {
-        
+        if self.USE_KITURA_NET {
+            
+        } else {
+            
+        }
     }
 }

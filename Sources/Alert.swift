@@ -245,7 +245,6 @@ class Alert {
             throw AlertNotificationError.AlertError("Invalid URL provided.")
         }
         try bluemixRequest.postAlert(self) { (data, response, error) in
-            print("\(response)")
             // Possible error #1: no data received.
             if data == nil {
                 if callback != nil {
