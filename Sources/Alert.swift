@@ -244,7 +244,18 @@ class Alert {
         guard let bluemixRequest = BluemixRequest(type: .Alert, usingCredentials: credentials) else {
             throw AlertNotificationError.AlertError("Invalid URL provided.")
         }
-        try bluemixRequest.postAlert(self) { (data, response, error) in
+        let errors = [208: "This error has already been reported.", 400: "The service reported an invalid request.", 401: "Authorization is invalid.", 415: "Invalid media type for alert."]
+        let bluemixCallback = Alert.alertCallbackBuilder(statusResponses: errors, withFinalCallback: callback)
+        try bluemixRequest.postAlert(self, callback: bluemixCallback)
+    }
+    
+    /*
+     * Class functions and properties.
+     */
+    
+    // Create a callback function for when we are expecting an Alert object in response.
+    class func alertCallbackBuilder(statusResponses: [Int: String], withFinalCallback callback: ((Alert?, Error?) -> Void)? = nil) -> (Data?, URLResponse?, Swift.Error?) -> Void {
+        return { (data: Data?, response: URLResponse?, error: Swift.Error?) in
             // Possible error #1: no data received.
             if data == nil {
                 if callback != nil {
@@ -271,27 +282,12 @@ class Alert {
             }
             
             // Possible error #3: bad response code from the server.
-            if let httpResponse = response as? HTTPURLResponse {
-                var httpError: String? = nil
-                switch httpResponse.statusCode {
-                case 208:
-                    httpError = "This error has already been reported."
-                case 400:
-                    httpError = "The server reported an invalid request."
-                case 401:
-                    httpError = "Authorization is invalid."
-                case 415:
-                    httpError = "Invalid media type for alert."
-                default:
-                    break
+            if let httpResponse = response as? HTTPURLResponse, let errMessage = statusResponses[httpResponse.statusCode] {
+                if callback != nil {
+                    callback!(nil, AlertNotificationError.BluemixError(errMessage))
                 }
-                if httpError != nil {
-                    if callback != nil {
-                        callback!(nil, AlertNotificationError.HTTPError(httpError!))
-                    }
-                    Log.error(httpError!)
-                    return
-                }
+                Log.error(errMessage)
+                return
             }
             
             // Possible error #4: malformed response data.
@@ -309,10 +305,6 @@ class Alert {
             }
         }
     }
-    
-    /*
-     * Class functions and properties.
-     */
     
     // Delete an alert.
     class func delete(shortId id: String, usingCredentials credentials: ServerCredentials, callback: ((Int?, Error?) -> Void)? = nil) throws {
@@ -368,65 +360,8 @@ class Alert {
         guard let bluemixRequest = BluemixRequest(type: .Alert, usingCredentials: credentials) else {
             throw AlertNotificationError.AlertError("Invalid URL provided.")
         }
-        try bluemixRequest.getAlert(shortId: id) { (data, response, error) in
-            // Possible error #1: no data received.
-            if data == nil {
-                if callback != nil {
-                    if error == nil {
-                        callback!(nil, AlertNotificationError.HTTPError("Payload from server is empty."))
-                    } else {
-                        callback!(nil, error)
-                    }
-                }
-                Log.error("Payload from server is empty.")
-                if error != nil {
-                    Log.error(error!.localizedDescription)
-                }
-                return
-            }
-            
-            // Possible error #2: error received.
-            if error != nil {
-                if callback != nil {
-                    callback!(nil, error)
-                }
-                Log.error(error!.localizedDescription)
-                return
-            }
-            
-            // Possible error #3: bad response code from the server.
-            if let httpResponse = response as? HTTPURLResponse {
-                var httpError: String? = nil
-                switch httpResponse.statusCode {
-                case 401:
-                    httpError = "Authorization is invalid."
-                case 404:
-                    httpError = "An alert matching this short ID could not be found."
-                default:
-                    break
-                }
-                if httpError != nil {
-                    if callback != nil {
-                        callback!(nil, AlertNotificationError.HTTPError(httpError!))
-                    }
-                    Log.error(httpError!)
-                    return
-                }
-            }
-            
-            // Possible error #4: malformed response data.
-            guard let alertResponse = Alert(data: data!) else {
-                if callback != nil {
-                    callback!(nil, AlertNotificationError.HTTPError("Malformed response from server."))
-                }
-                Log.error("Malformed response from server.")
-                return
-            }
-            
-            // Finally, perform the callback on the data.
-            if callback != nil {
-                callback!(alertResponse, nil)
-            }
-        }
+        let errors = [401: "Authorization is invalid.", 404: "An alert matching this short ID could not be found."]
+        let bluemixCallback = Alert.alertCallbackBuilder(statusResponses: errors, withFinalCallback: callback)
+        try bluemixRequest.getAlert(shortId: id, callback: bluemixCallback)
     }
 }

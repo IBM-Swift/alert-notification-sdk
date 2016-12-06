@@ -50,7 +50,7 @@ class BluemixRequest {
     }
     
     // Create KituraNet request.
-    func createKituraNetRequest(to baseURL: URL, withMethod method: String, forID id: String? = nil, usingCredentials credentials: ServerCredentials, callback: ((Data?, URLResponse?, Swift.Error?) -> Void)? = nil) throws -> ClientRequest {
+    func createKituraNetRequest(to baseURL: URL, withMethod method: String, forID id: String? = nil, usingCredentials credentials: ServerCredentials, callback: @escaping (Data?, URLResponse?, Swift.Error?) -> Void) throws -> ClientRequest {
         let requestURL: URL? = id != nil ? URL(string: id!, relativeTo: baseURL) : baseURL
         if requestURL == nil {
             throw AlertNotificationError.AlertError("Invalid alert ID provided to \(method) request.")
@@ -69,14 +69,10 @@ class BluemixRequest {
             do {
                 let dataString = try response?.readString()
                 let responseData = dataString != nil ? dataString!.data(using: String.Encoding.utf8) : nil
-                if callback != nil {
-                    callback!(responseData, httpResponse, nil)
-                }
+                callback(responseData, httpResponse, nil)
             } catch {
                 Log.error(error.localizedDescription)
-                if callback != nil {
-                    callback!(nil, httpResponse, error)
-                }
+                callback(nil, httpResponse, error)
             }
         }
         
@@ -85,13 +81,9 @@ class BluemixRequest {
     }
     
     // Submit URLSession request.
-    func sendRequest(req: URLRequest, callback: ((Data?, URLResponse?, Swift.Error?) -> Void)? = nil) {
+    func sendRequest(req: URLRequest, callback: @escaping (Data?, URLResponse?, Swift.Error?) -> Void) {
         let session: URLSession = createSession()
-        let reqTask = session.dataTask(with: req) { (data, response, error) in
-            if callback != nil {
-                callback!(data, response, error)
-            }
-        }
+        let reqTask = session.dataTask(with: req, completionHandler: callback)
         reqTask.resume()
         session.finishTasksAndInvalidate()
     }
@@ -100,7 +92,7 @@ class BluemixRequest {
      * Alert requests.
      */
     
-    func postAlert(_ alert: Alert, callback: ((Data?, URLResponse?, Swift.Error?) -> Void)? = nil) throws {
+    func postAlert(_ alert: Alert, callback: @escaping (Data?, URLResponse?, Swift.Error?) -> Void) throws {
         if self.USE_KITURA_NET {
             let req: ClientRequest = try self.createKituraNetRequest(to: self.baseURL, withMethod: "POST", usingCredentials: credentials, callback: callback)
             
@@ -120,7 +112,7 @@ class BluemixRequest {
         }
     }
     
-    func getAlert(shortId id: String, callback: ((Data?, URLResponse?, Swift.Error?) -> Void)? = nil) throws {
+    func getAlert(shortId id: String, callback: @escaping (Data?, URLResponse?, Swift.Error?) -> Void) throws {
         if self.USE_KITURA_NET {
             let req: ClientRequest = try self.createKituraNetRequest(to: self.baseURL, withMethod: "GET", forID: id, usingCredentials: credentials, callback: callback)
             req.end()
@@ -136,7 +128,7 @@ class BluemixRequest {
         }
     }
     
-    func deleteAlert(shortId id: String, callback: ((Data?, URLResponse?, Swift.Error?) -> Void)? = nil) throws {
+    func deleteAlert(shortId id: String, callback: @escaping (Data?, URLResponse?, Swift.Error?) -> Void) throws {
         if self.USE_KITURA_NET {
             let req: ClientRequest = try self.createKituraNetRequest(to: self.baseURL, withMethod: "DELETE", forID: id, usingCredentials: credentials, callback: callback)
             req.end()
@@ -156,7 +148,7 @@ class BluemixRequest {
      * Message requests.
      */
     
-    func postMessage(message: Message, callback: ((Data?, URLResponse?, Swift.Error?) -> Void)? = nil) throws {
+    func postMessage(message: Message, callback: @escaping (Data?, URLResponse?, Swift.Error?) -> Void) throws {
         if self.USE_KITURA_NET {
             
         } else {
@@ -164,7 +156,7 @@ class BluemixRequest {
         }
     }
     
-    func getMessage(shortId id: String, callback: ((Data?, URLResponse?, Swift.Error?) -> Void)? = nil) throws {
+    func getMessage(shortId id: String, callback: @escaping (Data?, URLResponse?, Swift.Error?) -> Void) throws {
         if self.USE_KITURA_NET {
             
         } else {

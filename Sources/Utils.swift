@@ -64,10 +64,24 @@ enum NotificationState: String {
     case Unnotified, Notified, Acknowledged, Archived, Escalated
 }
 
-enum AlertNotificationError: Error {
+enum AlertNotificationError: Error, CustomStringConvertible {
     case AlertError(String)
     case MessageError(String)
     case HTTPError(String)
+    case BluemixError(String)
+    
+    var description: String {
+        switch self {
+        case .AlertError(let message):
+            return "Alert error: \(message)"
+        case .MessageError(let message):
+            return "Message error: \(message)"
+        case .HTTPError(let message):
+            return "HTTP error: \(message)"
+        case .BluemixError(let message):
+            return "Bluemix error: \(message)"
+        }
+    }
 }
 
 func getSeverity(from str: String) -> Severity? {

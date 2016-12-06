@@ -15,6 +15,7 @@ var allFinished: Bool = false
 func testPostCallback(alert: Alert?, error: Error?) {
     if error != nil {
         print("\(error!.localizedDescription)")
+        print("\(error!)")
     } else {
         print("No error")
         print("\(alert)")
@@ -26,6 +27,7 @@ func testPostCallback(alert: Alert?, error: Error?) {
 func testGetCallback(alert: Alert?, error: Error?) {
     if error != nil {
         print("\(error!.localizedDescription)")
+        print("\(error!)")
     } else {
         print("No error")
         print("\(alert)")
@@ -37,6 +39,7 @@ func testGetCallback(alert: Alert?, error: Error?) {
 func testDeleteCallback(statusCode: Int?, error: Error?) {
     if error != nil {
         print("\(error!.localizedDescription)")
+        print("\(error!)")
     } else {
         print("No error")
         print("\(statusCode)")
@@ -54,11 +57,11 @@ print(testAlert)
 //
 //while allFinished != true {}
 
-//allFinished = false
-//
-//let _ = try Alert.get(shortId: "14-0", usingCredentials: creds, callback: testGetCallback)
-//
-//while allFinished != true {}
+allFinished = false
+
+let _ = try Alert.get(shortId: "14-3", usingCredentials: creds, callback: testGetCallback)
+
+while allFinished != true {}
 
 //allFinished = false
 //
