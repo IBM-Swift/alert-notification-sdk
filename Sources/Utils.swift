@@ -92,3 +92,27 @@ func getSeverity(from str: String) -> Severity? {
         default: return nil
     }
 }
+
+/*
+ * Message-related utils.
+ */
+
+struct Recipient {
+    let name: String
+    let type: RecipientType
+    var broadcast: String?
+    init?(name: String, type: RecipientType, broadcast: String? = nil) {
+        self.name = name
+        self.type = type
+        self.broadcast = broadcast
+        
+        // In the case of an Integration message, the broadcast is required.
+        if self.type == .Integration && self.broadcast == nil {
+            return nil
+        }
+    }
+}
+
+enum RecipientType: String {
+    case User, Group, Integration
+}
