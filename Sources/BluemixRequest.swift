@@ -12,7 +12,7 @@ import KituraNet
 
 import LoggerAPI
 
-class BluemixRequest {
+internal class BluemixRequest {
     let USE_KITURA_NET: Bool = false
     
     /*
