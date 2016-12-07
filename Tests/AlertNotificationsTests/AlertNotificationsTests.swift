@@ -5,23 +5,23 @@ import KituraNet
 
 class AlertNotificationsTests: XCTestCase {
     // Get a generic alert.
-    class func getAlertForTest() -> Alert? {
-        return Alert(what: "TestWhat", where: "TestWhere", severity: .Fatal, id: "TestID", when: 0, type: .Problem, source: "TestSource", applicationsOrServices: ["TestApps"], URLs: [AlertURL(description: "TestDesc", URL: "TestURL")], details: [Detail(name: "TestName", value: "TestValue")], emailMessageToSend: EmailMessage(subject: "TestSubject", body: "TestBody"), smsMessageToSend: "TestSMS", voiceMessageToSend: "TestVoice")
+    class func getAlertForTest() throws -> Alert {
+        return try Alert.Builder().setSummary("TestWhat").setLocation("TestWhere").setSeverity(.Fatal).setID("TestID").setDate(fromIntInMilliseconds: 0).setStatus(.Problem).setSource("TestSource").setApplicationsOrServices(["TestApps"]).setURLs([AlertURL(description: "TestDesc", URL: "TestURL")]).setDetails([Detail(name: "TestName", value: "TestValue")]).setEmailMessageToSend(EmailMessage(subject: "TestSubject", body: "TestBody")).setSMSMessageToSend("TestSMS").setVoiceMessageToSend("TestVoice").build()
     }
     
     override class func setUp() {
         super.setUp()
         
         let router = Router()
-        router.get("/:id") { req, res, next in
-            let responseAlert = getAlertForTest()
-            try res.send(data: responseAlert!.postBody()!).end()
+        router.get("/alerts/v1/:id") { req, res, next in
+            let responseAlert = try getAlertForTest()
+            try res.send(data: responseAlert.postBody()!).end()
         }
-        router.post("/") { req, res, next in
-            let responseAlert = getAlertForTest()
-            try res.send(data: responseAlert!.postBody()!).end()
+        router.post("/alerts/v1") { req, res, next in
+            let responseAlert = try getAlertForTest()
+            try res.send(data: responseAlert.postBody()!).end()
         }
-        router.delete("/:id") { req, res, next in
+        router.delete("/alerts/v1/:id") { req, res, next in
             res.statusCode = HTTPStatusCode.noContent
             try res.send("Successful request").end()
         }
@@ -39,9 +39,9 @@ class AlertNotificationsTests: XCTestCase {
     
     // Ensure that the Alert object can correctly be written out to a JSON string.
     func testAlertPostBody() throws {
-        let newAlert = AlertNotificationsTests.getAlertForTest()
+        let newAlert = try AlertNotificationsTests.getAlertForTest()
         XCTAssertNotNil(newAlert)
-        let alertBody = try newAlert!.postBody()
+        let alertBody = try newAlert.postBody()
         XCTAssertNotNil(alertBody)
         let alertJsonString = String(data: alertBody!, encoding: .utf8)
         XCTAssertNotNil(alertJsonString)
@@ -72,12 +72,12 @@ class AlertNotificationsTests: XCTestCase {
     func testAlertPost() throws {
         let testExpectation = expectation(description: "Calls a POST request on our small Kitura server.")
         
-        let newAlert = AlertNotificationsTests.getAlertForTest()
+        let newAlert = try AlertNotificationsTests.getAlertForTest()
         XCTAssertNotNil(newAlert)
         
         func testCallback(alert: Alert?, error: Swift.Error?) {
             if error != nil {
-                XCTFail("POST returned with error: \(error!.localizedDescription)")
+                XCTFail("POST returned with error: \(error!)")
             } else {
                 XCTAssertNotNil(alert)
                 XCTAssertEqual("TestID", alert!.id)
@@ -87,7 +87,7 @@ class AlertNotificationsTests: XCTestCase {
         
         let creds = ServerCredentials(url: "http://localhost:3000", name: "foo", password: "bar")
         do {
-            let _ = try newAlert!.post(usingCredentials: creds, callback: testCallback)
+            let _ = try newAlert.post(usingCredentials: creds, callback: testCallback)
         } catch AlertNotificationError.AlertError(let errorMessage) {
             XCTFail("POST request failed: \(errorMessage)")
         }
@@ -105,7 +105,7 @@ class AlertNotificationsTests: XCTestCase {
         
         func testCallback(alert: Alert?, error: Swift.Error?) {
             if error != nil {
-                XCTFail("GET returned with error: \(error!.localizedDescription)")
+                XCTFail("GET returned with error: \(error!)")
             } else {
                 XCTAssertNotNil(alert)
                 XCTAssertEqual("TestID", alert!.id)
@@ -133,7 +133,7 @@ class AlertNotificationsTests: XCTestCase {
         
         func testCallback(statusCode: Int?, error: Swift.Error?) {
             if error != nil {
-                XCTFail("DELETE returned with error: \(error!.localizedDescription)")
+                XCTFail("DELETE returned with error: \(error!)")
             } else {
                 XCTAssertNotNil(statusCode)
                 XCTAssertEqual(statusCode, 204)
@@ -154,6 +154,8 @@ class AlertNotificationsTests: XCTestCase {
             }
         }
     }
+    
+    // Test the entire flow actually going through Bluemix.
 
     static var allTests : [(String, (AlertNotificationsTests) -> () throws -> Void)] {
         return [

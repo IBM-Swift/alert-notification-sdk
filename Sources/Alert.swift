@@ -16,15 +16,15 @@ class Alert {
      */
     
     // Required variables.
-    let what: String
-    let `where`: String
+    let summary: String
+    let location: String
     let severity: Severity
     
     // Optional variables.
     private(set) var id: String?
     private(set) var shortId: String?
-    private(set) var when: Date?
-    private(set) var type: AlertType?
+    private(set) var date: Date?
+    private(set) var status: AlertStatus?
     private(set) var source: String?
     private(set) var applicationsOrServices: [String]?
     private(set) var URLs: [AlertURL]?
@@ -42,124 +42,124 @@ class Alert {
      * Builder.
      */
     class Builder {
-        var _what: String?
-        var _where: String?
-        var _severity: Severity?
-        var _id: String?
-        var _when: Date?
-        var _type: AlertType?
-        var _source: String?
-        var _applicationsOrServices: [String]?
-        var _URLs: [AlertURL]?
-        var _details: [Detail]?
-        var _emailMessageToSend: EmailMessage?
-        var _smsMessageToSend: String?
-        var _voiceMessageToSend: String?
+        var summary: String?
+        var location: String?
+        var severity: Severity?
+        var id: String?
+        var date: Date?
+        var status: AlertStatus?
+        var source: String?
+        var applicationsOrServices: [String]?
+        var URLs: [AlertURL]?
+        var details: [Detail]?
+        var emailMessageToSend: EmailMessage?
+        var smsMessageToSend: String?
+        var voiceMessageToSend: String?
         
         init() {
             
         }
         
         init(from alert: Alert) {
-            self._what = alert.what
-            self._where = alert.`where`
-            self._severity = alert.severity
-            self._id = alert.id
-            self._when = alert.when
-            self._type = alert.type
-            self._source = alert.source
-            self._applicationsOrServices = alert.applicationsOrServices
-            self._URLs = alert.URLs
-            self._details = alert.details
-            self._emailMessageToSend = alert.emailMessageToSend
-            self._smsMessageToSend = alert.smsMessageToSend
-            self._voiceMessageToSend = alert.voiceMessageToSend
+            self.summary = alert.summary
+            self.location = alert.location
+            self.severity = alert.severity
+            self.id = alert.id
+            self.date = alert.date
+            self.status = alert.status
+            self.source = alert.source
+            self.applicationsOrServices = alert.applicationsOrServices
+            self.URLs = alert.URLs
+            self.details = alert.details
+            self.emailMessageToSend = alert.emailMessageToSend
+            self.smsMessageToSend = alert.smsMessageToSend
+            self.voiceMessageToSend = alert.voiceMessageToSend
         }
         
-        func what(_ _what: String) -> Builder {
-            self._what = _what
+        func setSummary(_ summary: String) -> Builder {
+            self.summary = summary
             return self
         }
         
-        func `where`(_ _where: String) -> Builder {
-            self._where = _where
+        func setLocation(_ location: String) -> Builder {
+            self.location = location
             return self
         }
         
-        func severity(_ _severity: Severity) -> Builder {
-            self._severity = _severity
+        func setSeverity(_ severity: Severity) -> Builder {
+            self.severity = severity
             return self
         }
         
-        func id(_ _id: String) -> Builder {
-            self._id = _id
+        func setID(_ id: String) -> Builder {
+            self.id = id
             return self
         }
         
-        func when(_ _when: Date) -> Builder {
-            self._when = _when
+        func setDate(_ date: Date) -> Builder {
+            self.date = date
             return self
         }
         
-        func when(_ _when: String) throws -> Builder {
+        func setDate(fromString date: String) throws -> Builder {
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-            guard let date: Date = dateFormatter.date(from: _when) else {
-                throw AlertNotificationError.AlertError("Invalid String format for variable \"when\". Correct format is yyyy-MM-dd HH:mm:ss")
+            guard let date: Date = dateFormatter.date(from: date) else {
+                throw AlertNotificationError.AlertError("Invalid String format for variable \"date\". Correct format is yyyy-MM-dd HH:mm:ss")
             }
-            return self.when(date)
+            return self.setDate(date)
         }
         
-        func when(_ _when: Int) -> Builder {
-            let date: Date = Date(timeIntervalSince1970: (Double(_when)/1000.0) as TimeInterval)
-            return self.when(date)
+        func setDate(fromIntInMilliseconds date: Int) -> Builder {
+            let date: Date = Date(timeIntervalSince1970: (Double(date)/1000.0) as TimeInterval)
+            return self.setDate(date)
         }
         
-        func type(_ _type: AlertType) -> Builder {
-            self._type = _type
+        func setStatus(_ status: AlertStatus) -> Builder {
+            self.status = status
             return self
         }
         
-        func source(_ _source: String) -> Builder {
-            self._source = _source
+        func setSource(_ source: String) -> Builder {
+            self.source = source
             return self
         }
         
-        func applicationsOrServices(_ _apps: [String]) -> Builder {
-            self._applicationsOrServices = _apps
+        func setApplicationsOrServices(_ apps: [String]) -> Builder {
+            self.applicationsOrServices = apps
             return self
         }
         
-        func URLs(_ _URLs: [AlertURL]) -> Builder {
-            self._URLs = _URLs
+        func setURLs(_ URLs: [AlertURL]) -> Builder {
+            self.URLs = URLs
             return self
         }
         
-        func details(_ _details: [Detail]) -> Builder {
-            self._details = _details
+        func setDetails(_ details: [Detail]) -> Builder {
+            self.details = details
             return self
         }
         
-        func emailMessageToSend(_ _email: EmailMessage) -> Builder {
-            self._emailMessageToSend = _email
+        func setEmailMessageToSend(_ email: EmailMessage) -> Builder {
+            self.emailMessageToSend = email
             return self
         }
         
-        func smsMessageToSend(_ _sms: String) -> Builder {
-            self._smsMessageToSend = _sms
+        func setSMSMessageToSend(_ sms: String) -> Builder {
+            self.smsMessageToSend = sms
             return self
         }
         
-        func voiceMessageToSend(_ _voice: String) -> Builder {
-            self._voiceMessageToSend = _voice
+        func setVoiceMessageToSend(_ voice: String) -> Builder {
+            self.voiceMessageToSend = voice
             return self
         }
         
         func build() throws -> Alert {
-            guard let what = self._what, let `where` = self._where, let severity = self._severity else {
-                throw AlertNotificationError.AlertError("Cannot build Alert object without values for variables \"what\", \"where\" and \"severity\".")
+            guard let summary = self.summary, let location = self.location, let severity = self.severity else {
+                throw AlertNotificationError.AlertError("Cannot build Alert object without values for variables \"summary\", \"location\" and \"severity\".")
             }
-            return Alert(what: what, where: `where`, severity: severity, id: self._id, when: self._when, type: self._type, source: self._source, applicationsOrServices: self._applicationsOrServices, URLs: self._URLs, details: self._details, emailMessageToSend: self._emailMessageToSend, smsMessageToSend: self._smsMessageToSend, voiceMessageToSend: self._voiceMessageToSend)
+            return Alert(summary: summary, location: location, severity: severity, id: self.id, date: self.date, status: self.status, source: self.source, applicationsOrServices: self.applicationsOrServices, URLs: self.URLs, details: self.details, emailMessageToSend: self.emailMessageToSend, smsMessageToSend: self.smsMessageToSend, voiceMessageToSend: self.voiceMessageToSend)
         }
     }
     
@@ -168,14 +168,14 @@ class Alert {
      */
     
     // Base initializer.
-    init(what: String, where loc: String, severity: Severity, id: String? = nil, when: Date? = nil, type: AlertType? = nil, source: String? = nil, applicationsOrServices: [String]? = nil, URLs: [AlertURL]? = nil, details: [Detail]? = nil, emailMessageToSend: EmailMessage? = nil, smsMessageToSend: String? = nil, voiceMessageToSend: String? = nil) {
+    private init(summary: String, location: String, severity: Severity, id: String? = nil, date: Date? = nil, status: AlertStatus? = nil, source: String? = nil, applicationsOrServices: [String]? = nil, URLs: [AlertURL]? = nil, details: [Detail]? = nil, emailMessageToSend: EmailMessage? = nil, smsMessageToSend: String? = nil, voiceMessageToSend: String? = nil) {
         
-        self.what = what
-        self.`where` = loc
+        self.summary = summary
+        self.location = location
         self.severity = severity
         self.id = id
-        self.when = when
-        self.type = type
+        self.date = date
+        self.status = status
         self.source = source
         self.applicationsOrServices = applicationsOrServices
         self.URLs = URLs
@@ -186,17 +186,17 @@ class Alert {
     }
     
     // JSON initializer.
-    init?(data: Data) {
+    internal init?(data: Data) {
         let json = try? JSONSerialization.jsonObject(with: data, options: [])
         if let dictionary = json as? [String: Any] {
             // Mandatory properties.
-            if let what = dictionary["What"] as? String {
-                self.what = what
+            if let summary = dictionary["What"] as? String {
+                self.summary = summary
             } else {
                 return nil
             }
-            if let `where` = dictionary["Where"] as? String {
-                self.`where` = `where`
+            if let location = dictionary["Where"] as? String {
+                self.location = location
             } else {
                 return nil
             }
@@ -215,15 +215,15 @@ class Alert {
             if let shortId = dictionary["ShortId"] as? String {
                 self.shortId = shortId
             }
-            if let when = dictionary["When"] as? String {
+            if let date = dictionary["When"] as? String {
                 let dateFormatter = DateFormatter()
                 dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-                self.when = dateFormatter.date(from: when)
-            } else if let when = dictionary["When"] as? Int {
-                self.when = Date(timeIntervalSince1970: (Double(when)/1000.0) as TimeInterval)
+                self.date = dateFormatter.date(from: date)
+            } else if let date = dictionary["When"] as? Int {
+                self.date = Date(timeIntervalSince1970: (Double(date)/1000.0) as TimeInterval)
             }
-            if let type = dictionary["Type"] as? String, let typeValue = AlertType(rawValue: type) {
-                self.type = typeValue
+            if let status = dictionary["Type"] as? String, let statusValue = AlertStatus(rawValue: status) {
+                self.status = statusValue
             }
             if let source = dictionary["Source"] as? String {
                 self.source = source
@@ -285,8 +285,8 @@ class Alert {
     // Convert this alert's contents to a JSON data object.
     func postBody() throws -> Data? {
         var postDict: Dictionary<String, Any> = Dictionary<String, Any>()
-        postDict["What"] = self.what
-        postDict["Where"] = self.`where`
+        postDict["What"] = self.summary
+        postDict["Where"] = self.location
         postDict["Severity"] = self.severity.rawValue
         if let alertId = self.id {
             postDict["Identifier"] = alertId
@@ -294,11 +294,11 @@ class Alert {
         if let shortId = self.shortId {
             postDict["ShortId"] = shortId
         }
-        if let alertWhen = self.when {
-            postDict["When"] = Int(alertWhen.timeIntervalSince1970 * 1000.0)
+        if let alertDate = self.date {
+            postDict["When"] = Int(alertDate.timeIntervalSince1970 * 1000.0)
         }
-        if let alertType = self.type {
-            postDict["Type"] = alertType.rawValue
+        if let alertStatus = self.status {
+            postDict["Type"] = alertStatus.rawValue
         }
         if let alertSource = self.source {
             postDict["Source"] = alertSource
@@ -438,22 +438,22 @@ class Alert {
                 Log.error("Could not parse the HTTP response from the server.")
                 return
             }
-            var httpError: String? = nil
+            var bluemixError: String? = nil
             switch httpResponse.statusCode {
             case 401:
-                httpError = "Authorization is invalid."
+                bluemixError = "Authorization is invalid."
             case 404:
-                httpError = "The alert could not be found."
+                bluemixError = "The alert could not be found."
             case 500:
-                httpError = "There was an error archiving the alert."
+                bluemixError = "There was an error archiving the alert."
             default:
                 break
             }
-            if httpError != nil {
+            if bluemixError != nil {
                 if callback != nil {
-                    callback!(httpResponse.statusCode, AlertNotificationError.HTTPError(httpError!))
+                    callback!(httpResponse.statusCode, AlertNotificationError.BluemixError(bluemixError!))
                 }
-                Log.error(httpError!)
+                Log.error(bluemixError!)
                 return
             }
             

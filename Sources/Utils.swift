@@ -56,7 +56,7 @@ enum Severity: Int {
     case Clear = 0, Indeterminate, Warning, Minor, Major, Critical, Fatal
 }
 
-enum AlertType: String {
+enum AlertStatus: String {
     case Problem, Acknowledged, Resolved
 }
 
