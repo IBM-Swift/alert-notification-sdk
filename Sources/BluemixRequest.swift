@@ -13,23 +13,20 @@ import KituraNet
 import LoggerAPI
 
 internal class BluemixRequest {
-    let USE_KITURA_NET: Bool = false
+    let USE_KITURA_NET: Bool = true
     
     /*
      * Instance veriables and methods.
      */
     
     // Common variables.
-    let type: RequestType
     let baseURL: URL
     let credentials: ServerCredentials
     
     // Initializer.
-    init?(type: RequestType, usingCredentials credentials: ServerCredentials) {
-        self.type = type
+    init?(usingCredentials credentials: ServerCredentials) {
         self.credentials = credentials
-        
-        guard let baseURL = URL(string: "\(credentials.url)/\(type.rawValue.lowercased())s/v1/") else {
+        guard let baseURL = URL(string: "\(credentials.url)/") else {
             Log.error("Invalid URL provided.")
             return nil
         }
@@ -50,8 +47,11 @@ internal class BluemixRequest {
     }
     
     // Create KituraNet request.
-    func createKituraNetRequest(to baseURL: URL, withMethod method: String, forID id: String? = nil, usingCredentials credentials: ServerCredentials, callback: @escaping (Data?, URLResponse?, Swift.Error?) -> Void) throws -> ClientRequest {
-        let requestURL: URL? = id != nil ? URL(string: id!, relativeTo: baseURL) : baseURL
+    func createKituraNetRequest(to baseURL: URL, forType type: String, withMethod method: String, forID id: String? = nil, usingCredentials credentials: ServerCredentials, callback: @escaping (Data?, URLResponse?, Swift.Error?) -> Void) throws -> ClientRequest {
+        guard let apiURL = URL(string: "\(type)s/v1/", relativeTo: self.baseURL) else {
+            throw AlertNotificationError.AlertError("Invalid URL provided.")
+        }
+        let requestURL: URL? = id != nil ? URL(string: id!, relativeTo: apiURL) : apiURL
         if requestURL == nil {
             throw AlertNotificationError.AlertError("Invalid alert ID provided to \(method) request.")
         }
@@ -94,13 +94,16 @@ internal class BluemixRequest {
     
     func postAlert(_ alert: Alert, callback: @escaping (Data?, URLResponse?, Swift.Error?) -> Void) throws {
         if self.USE_KITURA_NET {
-            let req: ClientRequest = try self.createKituraNetRequest(to: self.baseURL, withMethod: "POST", usingCredentials: credentials, callback: callback)
+            let req: ClientRequest = try self.createKituraNetRequest(to: self.baseURL, forType: "alert", withMethod: "POST", usingCredentials: credentials, callback: callback)
             
             let alertBody = try alert.postBody()
             req.write(from: alertBody!)
             req.end()
         } else {
-            var request: URLRequest = URLRequest(url: self.baseURL)
+            guard let apiURL = URL(string: "alerts/v1/", relativeTo: self.baseURL) else {
+                throw AlertNotificationError.AlertError("Invalid URL provided.")
+            }
+            var request: URLRequest = URLRequest(url: apiURL)
             request.httpMethod = "POST"
             request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
             request.setValue("Basic \(credentials.authString)", forHTTPHeaderField: "Authorization")
@@ -114,10 +117,13 @@ internal class BluemixRequest {
     
     func getAlert(shortId id: String, callback: @escaping (Data?, URLResponse?, Swift.Error?) -> Void) throws {
         if self.USE_KITURA_NET {
-            let req: ClientRequest = try self.createKituraNetRequest(to: self.baseURL, withMethod: "GET", forID: id, usingCredentials: credentials, callback: callback)
+            let req: ClientRequest = try self.createKituraNetRequest(to: self.baseURL, forType: "alert", withMethod: "GET", forID: id, usingCredentials: credentials, callback: callback)
             req.end()
         } else {
-            guard let fullUrl: URL = URL(string: id, relativeTo: self.baseURL) else {
+            guard let apiURL = URL(string: "alerts/v1/", relativeTo: self.baseURL) else {
+                throw AlertNotificationError.AlertError("Invalid URL provided.")
+            }
+            guard let fullUrl: URL = URL(string: id, relativeTo: apiURL) else {
                 throw AlertNotificationError.AlertError("Invalid alert ID provided to GET request.")
             }
             var request: URLRequest = URLRequest(url: fullUrl)
@@ -130,10 +136,13 @@ internal class BluemixRequest {
     
     func deleteAlert(shortId id: String, callback: @escaping (Data?, URLResponse?, Swift.Error?) -> Void) throws {
         if self.USE_KITURA_NET {
-            let req: ClientRequest = try self.createKituraNetRequest(to: self.baseURL, withMethod: "DELETE", forID: id, usingCredentials: credentials, callback: callback)
+            let req: ClientRequest = try self.createKituraNetRequest(to: self.baseURL, forType: "alert", withMethod: "DELETE", forID: id, usingCredentials: credentials, callback: callback)
             req.end()
         } else {
-            guard let fullUrl: URL = URL(string: id, relativeTo: self.baseURL) else {
+            guard let apiURL = URL(string: "alerts/v1/", relativeTo: self.baseURL) else {
+                throw AlertNotificationError.AlertError("Invalid URL provided.")
+            }
+            guard let fullUrl: URL = URL(string: id, relativeTo: apiURL) else {
                 throw AlertNotificationError.AlertError("Invalid alert ID provided to DELETE request.")
             }
             var request: URLRequest = URLRequest(url: fullUrl)

@@ -350,7 +350,7 @@ class Alert {
     
     // Create a POST request with this alert.
     func post(usingCredentials credentials: ServerCredentials, callback: ((Alert?, Error?) -> Void)? = nil) throws {
-        guard let bluemixRequest = BluemixRequest(type: .Alert, usingCredentials: credentials) else {
+        guard let bluemixRequest = BluemixRequest(usingCredentials: credentials) else {
             throw AlertNotificationError.AlertError("Invalid URL provided.")
         }
         let errors = [208: "This error has already been reported.", 400: "The service reported an invalid request.", 401: "Authorization is invalid.", 415: "Invalid media type for alert."]
@@ -417,7 +417,7 @@ class Alert {
     
     // Delete an alert.
     class func delete(shortId id: String, usingCredentials credentials: ServerCredentials, callback: ((Int?, Error?) -> Void)? = nil) throws {
-        guard let bluemixRequest = BluemixRequest(type: .Alert, usingCredentials: credentials) else {
+        guard let bluemixRequest = BluemixRequest(usingCredentials: credentials) else {
             throw AlertNotificationError.AlertError("Invalid URL provided.")
         }
         try bluemixRequest.deleteAlert(shortId: id) { (data, response, error) in
@@ -466,7 +466,7 @@ class Alert {
     
     // Get an alert.
     class func get(shortId id: String, usingCredentials credentials: ServerCredentials, callback: ((Alert?, Error?) -> Void)? = nil) throws {
-        guard let bluemixRequest = BluemixRequest(type: .Alert, usingCredentials: credentials) else {
+        guard let bluemixRequest = BluemixRequest(usingCredentials: credentials) else {
             throw AlertNotificationError.AlertError("Invalid URL provided.")
         }
         let errors = [401: "Authorization is invalid.", 404: "An alert matching this short ID could not be found."]

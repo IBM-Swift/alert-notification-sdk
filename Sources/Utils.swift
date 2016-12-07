@@ -12,10 +12,6 @@ import Foundation
  * Generic utils.
  */
 
-enum RequestType: String {
-    case Alert, Message
-}
-
 func createSession() -> URLSession {
     let basicConfig = URLSessionConfiguration.`default`
     return URLSession(configuration: basicConfig)
