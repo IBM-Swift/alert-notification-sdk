@@ -13,7 +13,7 @@ import KituraNet
 import LoggerAPI
 
 internal class BluemixRequest {
-    let USE_KITURA_NET: Bool = true
+    let USE_KITURA_NET: Bool = false
     
     /*
      * Instance veriables and methods.
@@ -42,7 +42,6 @@ internal class BluemixRequest {
         guard let httpResponse = HTTPURLResponse(url: response!.urlComponents.url!, statusCode: response!.status, httpVersion: "HTTP/\(response!.httpVersionMajor).\(response!.httpVersionMinor)", headerFields: nil) else {
             return nil
         }
-        
         return httpResponse
     }
     
