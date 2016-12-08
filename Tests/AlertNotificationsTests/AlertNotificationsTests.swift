@@ -43,10 +43,10 @@ class AlertNotificationsTests: XCTestCase {
 //    }
     
     // Ensure that the Alert object can correctly be written out to a JSON string.
-    func testAlertPostBody() throws {
+    func testAlertToJSON() throws {
         let newAlert = try AlertNotificationsTests.getAlertForTest()
         XCTAssertNotNil(newAlert)
-        let alertBody = try newAlert.postBody()
+        let alertBody = try newAlert.toJSONData()
         XCTAssertNotNil(alertBody)
         let alertJsonString = String(data: alertBody!, encoding: .utf8)
         XCTAssertNotNil(alertJsonString)
@@ -91,7 +91,7 @@ class AlertNotificationsTests: XCTestCase {
                 if alert!.shortId != nil {
                     shortId = alert!.shortId
                     do {
-                        try Alert.get(shortId: shortId!, usingCredentials: credentials, callback: getCallback)
+                        try AlertService.get(shortId: shortId!, usingCredentials: credentials, callback: getCallback)
                     } catch {
                         XCTFail("GET failed with error: \(error)")
                         testExpectation.fulfill()
@@ -120,7 +120,7 @@ class AlertNotificationsTests: XCTestCase {
                     testExpectation.fulfill()
                 } else {
                     do {
-                        try Alert.delete(shortId: shortId!, usingCredentials: credentials, callback: deleteCallback)
+                        try AlertService.delete(shortId: shortId!, usingCredentials: credentials, callback: deleteCallback)
                     } catch {
                         XCTFail("DELETE failed with error: \(error)")
                         testExpectation.fulfill()
@@ -143,7 +143,7 @@ class AlertNotificationsTests: XCTestCase {
         let newAlert = try AlertNotificationsTests.getAlertForTest()
         
         do {
-            let _ = try newAlert.post(usingCredentials: credentials, callback: postCallback)
+            let _ = try AlertService.post(newAlert, usingCredentials: credentials, callback: postCallback)
         } catch {
             XCTFail("Alert services test failed: \(error)")
         }
@@ -246,7 +246,7 @@ class AlertNotificationsTests: XCTestCase {
 
     static var allTests : [(String, (AlertNotificationsTests) -> () throws -> Void)] {
         return [
-            ("testAlertPostBody", testAlertPostBody),
+            ("testAlertToJSON", testAlertToJSON),
             ("testAlertServices", testAlertServices)
         ]
     }

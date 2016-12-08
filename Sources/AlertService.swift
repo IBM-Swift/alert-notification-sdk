@@ -10,10 +10,10 @@ import Foundation
 
 import LoggerAPI
 
-internal class AlertService {
+class AlertService {
     class func post(_ alert: Alert, usingCredentials credentials: ServerCredentials, callback: ((Alert?, Error?) -> Void)? = nil) throws {
         guard let bluemixRequest = BluemixRequest(usingCredentials: credentials) else {
-            throw AlertNotificationError.AlertError("Invalid URL provided.")
+            throw AlertNotificationError.CredentialsError("Invalid URL provided.")
         }
         let errors = [208: "This error has already been reported.", 400: "The service reported an invalid request.", 401: "Authorization is invalid.", 415: "Invalid media type for alert."]
         let bluemixCallback = AlertService.alertCallbackBuilder(statusResponses: errors, withFinalCallback: callback)
@@ -22,7 +22,7 @@ internal class AlertService {
     
     class func get(shortId id: String, usingCredentials credentials: ServerCredentials, callback: ((Alert?, Error?) -> Void)? = nil) throws {
         guard let bluemixRequest = BluemixRequest(usingCredentials: credentials) else {
-            throw AlertNotificationError.AlertError("Invalid URL provided.")
+            throw AlertNotificationError.CredentialsError("Invalid URL provided.")
         }
         let errors = [401: "Authorization is invalid.", 404: "An alert matching this short ID could not be found."]
         let bluemixCallback = AlertService.alertCallbackBuilder(statusResponses: errors, withFinalCallback: callback)
@@ -31,7 +31,7 @@ internal class AlertService {
     
     class func delete(shortId id: String, usingCredentials credentials: ServerCredentials, callback: ((Int?, Error?) -> Void)? = nil) throws {
         guard let bluemixRequest = BluemixRequest(usingCredentials: credentials) else {
-            throw AlertNotificationError.AlertError("Invalid URL provided.")
+            throw AlertNotificationError.CredentialsError("Invalid URL provided.")
         }
         try bluemixRequest.deleteAlert(shortId: id) { (data, response, error) in
             // Possible error #1: error received.
@@ -78,7 +78,7 @@ internal class AlertService {
     }
     
     // Create a callback function for when we are expecting an Alert object in response.
-    class func alertCallbackBuilder(statusResponses: [Int: String], withFinalCallback callback: ((Alert?, Error?) -> Void)? = nil) -> (Data?, URLResponse?, Swift.Error?) -> Void {
+    private class func alertCallbackBuilder(statusResponses: [Int: String], withFinalCallback callback: ((Alert?, Error?) -> Void)? = nil) -> (Data?, URLResponse?, Swift.Error?) -> Void {
         return { (data: Data?, response: URLResponse?, error: Swift.Error?) in
             // Possible error #1: no data received.
             if data == nil {

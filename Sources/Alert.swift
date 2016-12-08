@@ -283,7 +283,7 @@ class Alert {
      */
     
     // Convert this alert's contents to a JSON data object.
-    func postBody() throws -> Data? {
+    func toJSONData() throws -> Data? {
         var postDict: Dictionary<String, Any> = Dictionary<String, Any>()
         postDict["What"] = self.summary
         postDict["Where"] = self.location
@@ -346,24 +346,5 @@ class Alert {
         }
         
         return try JSONSerialization.data(withJSONObject: postDict, options: [])
-    }
-    
-    // Create a POST request with this alert.
-    func post(usingCredentials credentials: ServerCredentials, callback: ((Alert?, Error?) -> Void)? = nil) throws {
-        try AlertService.post(self, usingCredentials: credentials, callback: callback)
-    }
-    
-    /*
-     * Class functions and properties.
-     */
-    
-    // Delete an alert.
-    class func delete(shortId id: String, usingCredentials credentials: ServerCredentials, callback: ((Int?, Error?) -> Void)? = nil) throws {
-        try AlertService.delete(shortId: id, usingCredentials: credentials, callback: callback)
-    }
-    
-    // Get an alert.
-    class func get(shortId id: String, usingCredentials credentials: ServerCredentials, callback: ((Alert?, Error?) -> Void)? = nil) throws {
-        try AlertService.get(shortId: id, usingCredentials: credentials, callback: callback)
     }
 }

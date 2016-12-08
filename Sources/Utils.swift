@@ -17,6 +17,29 @@ func createSession() -> URLSession {
     return URLSession(configuration: basicConfig)
 }
 
+enum AlertNotificationError: Error, CustomStringConvertible {
+    case AlertError(String)
+    case MessageError(String)
+    case HTTPError(String)
+    case BluemixError(String)
+    case CredentialsError(String)
+    
+    var description: String {
+        switch self {
+        case .AlertError(let message):
+            return "Alert error: \(message)"
+        case .MessageError(let message):
+            return "Message error: \(message)"
+        case .HTTPError(let message):
+            return "HTTP error: \(message)"
+        case .BluemixError(let message):
+            return "Bluemix error: \(message)"
+        case .CredentialsError(let message):
+            return "Credentials error: \(message)"
+        }
+    }
+}
+
 /*
  * Alert-related utils.
  */
@@ -58,26 +81,6 @@ enum AlertStatus: String {
 
 enum NotificationState: String {
     case Unnotified, Notified, Acknowledged, Archived, Escalated
-}
-
-enum AlertNotificationError: Error, CustomStringConvertible {
-    case AlertError(String)
-    case MessageError(String)
-    case HTTPError(String)
-    case BluemixError(String)
-    
-    var description: String {
-        switch self {
-        case .AlertError(let message):
-            return "Alert error: \(message)"
-        case .MessageError(let message):
-            return "Message error: \(message)"
-        case .HTTPError(let message):
-            return "HTTP error: \(message)"
-        case .BluemixError(let message):
-            return "Bluemix error: \(message)"
-        }
-    }
 }
 
 func getSeverity(from str: String) -> Severity? {
