@@ -17,14 +17,14 @@ internal func createSession() -> URLSession {
     return URLSession(configuration: basicConfig)
 }
 
-enum AlertNotificationError: Error, CustomStringConvertible {
+public enum AlertNotificationError: Error, CustomStringConvertible {
     case AlertError(String)
     case MessageError(String)
     case HTTPError(String)
     case BluemixError(String)
     case CredentialsError(String)
     
-    var description: String {
+    public var description: String {
         switch self {
         case .AlertError(let message):
             return "Alert error: \(message)"
@@ -44,42 +44,42 @@ enum AlertNotificationError: Error, CustomStringConvertible {
  * Alert-related utils.
  */
 
-struct AlertURL {
-    let description: String
-    let URL: String
-    init(description: String, URL: String) {
+public struct AlertURL {
+    public let description: String
+    public let URL: String
+    public init(description: String, URL: String) {
         self.description = description
         self.URL = URL
     }
 }
 
-struct Detail {
-    let name: String
-    let value: String
-    init(name: String, value: String) {
+public struct Detail {
+    public let name: String
+    public let value: String
+    public init(name: String, value: String) {
         self.name = name
         self.value = value
     }
 }
 
-struct EmailMessage {
-    let subject: String
-    let body: String
-    init(subject: String, body: String) {
+public struct EmailMessage {
+    public let subject: String
+    public let body: String
+    public init(subject: String, body: String) {
         self.subject = subject
         self.body = body
     }
 }
 
-enum Severity: Int {
+public enum Severity: Int {
     case Clear = 0, Indeterminate, Warning, Minor, Major, Critical, Fatal
 }
 
-enum AlertStatus: String {
+public enum AlertStatus: String {
     case Problem, Acknowledged, Resolved
 }
 
-enum NotificationState: String {
+public enum NotificationState: String {
     case Unnotified, Notified, Acknowledged, Archived, Escalated
 }
 
@@ -100,11 +100,11 @@ internal func getSeverity(from str: String) -> Severity? {
  * Message-related utils.
  */
 
-struct Recipient {
-    let name: String
-    let type: RecipientType
-    var broadcast: String?
-    init?(name: String, type: RecipientType, broadcast: String? = nil) {
+public struct Recipient {
+    public let name: String
+    public let type: RecipientType
+    public var broadcast: String?
+    public init?(name: String, type: RecipientType, broadcast: String? = nil) {
         self.name = name
         self.type = type
         self.broadcast = broadcast
@@ -116,6 +116,6 @@ struct Recipient {
     }
 }
 
-enum RecipientType: String {
+public enum RecipientType: String {
     case User, Group, Integration
 }

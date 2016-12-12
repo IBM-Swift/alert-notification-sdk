@@ -10,38 +10,38 @@ import Foundation
 
 import LoggerAPI
 
-class Alert {
+public class Alert {
     /*
      * Instance variables.
      */
     
     // Required variables.
-    let summary: String
-    let location: String
-    let severity: Severity
+    public let summary: String
+    public let location: String
+    public let severity: Severity
     
     // Optional variables.
-    private(set) var id: String?
-    private(set) var shortId: String?
-    private(set) var date: Date?
-    private(set) var status: AlertStatus?
-    private(set) var source: String?
-    private(set) var applicationsOrServices: [String]?
-    private(set) var URLs: [AlertURL]?
-    private(set) var details: [Detail]?
-    private(set) var emailMessageToSend: EmailMessage?
-    private(set) var SMSMessageToSend: String?
-    private(set) var voiceMessageToSend: String?
-    private(set) var notificationState: NotificationState?
-    private(set) var firstOccurrence: Date?
-    private(set) var lastNotified: Date?
-    private(set) var internalTime: Date?
-    private(set) var expired: Bool?
+    public private(set) var id: String?
+    public private(set) var shortId: String?
+    public private(set) var date: Date?
+    public private(set) var status: AlertStatus?
+    public private(set) var source: String?
+    public private(set) var applicationsOrServices: [String]?
+    public private(set) var URLs: [AlertURL]?
+    public private(set) var details: [Detail]?
+    public private(set) var emailMessageToSend: EmailMessage?
+    public private(set) var SMSMessageToSend: String?
+    public private(set) var voiceMessageToSend: String?
+    public private(set) var notificationState: NotificationState?
+    public private(set) var firstOccurrence: Date?
+    public private(set) var lastNotified: Date?
+    public private(set) var internalTime: Date?
+    public private(set) var expired: Bool?
     
     /*
      * Builder.
      */
-    class Builder {
+    public class Builder {
         private var summary: String?
         private var location: String?
         private var severity: Severity?
@@ -56,11 +56,11 @@ class Alert {
         private var SMSMessageToSend: String?
         private var voiceMessageToSend: String?
         
-        init() {
+        public init() {
             
         }
         
-        init(from alert: Alert) {
+        public init(from alert: Alert) {
             self.summary = alert.summary
             self.location = alert.location
             self.severity = alert.severity
@@ -76,32 +76,32 @@ class Alert {
             self.voiceMessageToSend = alert.voiceMessageToSend
         }
         
-        func setSummary(_ summary: String) -> Builder {
+        public func setSummary(_ summary: String) -> Builder {
             self.summary = summary
             return self
         }
         
-        func setLocation(_ location: String) -> Builder {
+        public func setLocation(_ location: String) -> Builder {
             self.location = location
             return self
         }
         
-        func setSeverity(_ severity: Severity) -> Builder {
+        public func setSeverity(_ severity: Severity) -> Builder {
             self.severity = severity
             return self
         }
         
-        func setID(_ id: String) -> Builder {
+        public func setID(_ id: String) -> Builder {
             self.id = id
             return self
         }
         
-        func setDate(_ date: Date) -> Builder {
+        public func setDate(_ date: Date) -> Builder {
             self.date = date
             return self
         }
         
-        func setDate(fromString date: String) throws -> Builder {
+        public func setDate(fromString date: String) throws -> Builder {
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
             guard let date: Date = dateFormatter.date(from: date) else {
@@ -110,52 +110,52 @@ class Alert {
             return self.setDate(date)
         }
         
-        func setDate(fromIntInMilliseconds date: Int) -> Builder {
+        public func setDate(fromIntInMilliseconds date: Int) -> Builder {
             let date: Date = Date(timeIntervalSince1970: (Double(date)/1000.0) as TimeInterval)
             return self.setDate(date)
         }
         
-        func setStatus(_ status: AlertStatus) -> Builder {
+        public func setStatus(_ status: AlertStatus) -> Builder {
             self.status = status
             return self
         }
         
-        func setSource(_ source: String) -> Builder {
+        public func setSource(_ source: String) -> Builder {
             self.source = source
             return self
         }
         
-        func setApplicationsOrServices(_ apps: [String]) -> Builder {
+        public func setApplicationsOrServices(_ apps: [String]) -> Builder {
             self.applicationsOrServices = apps
             return self
         }
         
-        func setURLs(_ URLs: [AlertURL]) -> Builder {
+        public func setURLs(_ URLs: [AlertURL]) -> Builder {
             self.URLs = URLs
             return self
         }
         
-        func setDetails(_ details: [Detail]) -> Builder {
+        public func setDetails(_ details: [Detail]) -> Builder {
             self.details = details
             return self
         }
         
-        func setEmailMessageToSend(_ email: EmailMessage) -> Builder {
+        public func setEmailMessageToSend(_ email: EmailMessage) -> Builder {
             self.emailMessageToSend = email
             return self
         }
         
-        func setSMSMessageToSend(_ SMS: String) -> Builder {
+        public func setSMSMessageToSend(_ SMS: String) -> Builder {
             self.SMSMessageToSend = SMS
             return self
         }
         
-        func setVoiceMessageToSend(_ voice: String) -> Builder {
+        public func setVoiceMessageToSend(_ voice: String) -> Builder {
             self.voiceMessageToSend = voice
             return self
         }
         
-        func build() -> Alert? {
+        public func build() -> Alert? {
             guard let summary = self.summary, let location = self.location, let severity = self.severity else {
                 Log.error("Cannot build Alert object without values for variables \"summary\", \"location\" and \"severity\".")
                 return nil

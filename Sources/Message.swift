@@ -8,24 +8,24 @@
 
 import Foundation
 
-class Message {
+public class Message {
     /*
      * Instance variables.
      */
     
     // Required variables.
-    let subject: String
-    let message: String
-    let recipients: [Recipient]
+    public let subject: String
+    public let message: String
+    public let recipients: [Recipient]
     
     // Optional variables (sent from the server).
-    private(set) var shortId: String?
-    private(set) var internalTime: Date?
+    public private(set) var shortId: String?
+    public private(set) var internalTime: Date?
     
     /*
      * Initializers.
      */
-    init?(subject: String, message: String, recipients: [Recipient]) {
+    public init?(subject: String, message: String, recipients: [Recipient]) {
         if subject.characters.count > 80 {
             return nil
         }

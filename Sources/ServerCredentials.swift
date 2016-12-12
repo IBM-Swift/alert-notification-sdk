@@ -8,10 +8,10 @@
 
 import Foundation
 
-struct ServerCredentials {
-    let url: String
-    let name: String
-    let password: String
+public struct ServerCredentials {
+    public let url: String
+    public let name: String
+    public let password: String
     internal var authString: String {
         get {
             let rawString = "\(name):\(password)"

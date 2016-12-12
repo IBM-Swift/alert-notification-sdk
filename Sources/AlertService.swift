@@ -10,8 +10,8 @@ import Foundation
 
 import LoggerAPI
 
-class AlertService {
-    class func post(_ alert: Alert, usingCredentials credentials: ServerCredentials, callback: ((Alert?, Error?) -> Void)? = nil) throws {
+public class AlertService {
+    public class func post(_ alert: Alert, usingCredentials credentials: ServerCredentials, callback: ((Alert?, Error?) -> Void)? = nil) throws {
         guard let bluemixRequest = BluemixRequest(usingCredentials: credentials) else {
             throw AlertNotificationError.CredentialsError("Invalid URL provided.")
         }
@@ -20,7 +20,7 @@ class AlertService {
         try bluemixRequest.postAlert(alert, callback: bluemixCallback)
     }
     
-    class func get(shortId id: String, usingCredentials credentials: ServerCredentials, callback: @escaping (Alert?, Error?) -> Void) throws {
+    public class func get(shortId id: String, usingCredentials credentials: ServerCredentials, callback: @escaping (Alert?, Error?) -> Void) throws {
         guard let bluemixRequest = BluemixRequest(usingCredentials: credentials) else {
             throw AlertNotificationError.CredentialsError("Invalid URL provided.")
         }
@@ -29,7 +29,7 @@ class AlertService {
         try bluemixRequest.getAlert(shortId: id, callback: bluemixCallback)
     }
     
-    class func delete(shortId id: String, usingCredentials credentials: ServerCredentials, callback: ((Error?) -> Void)? = nil) throws {
+    public class func delete(shortId id: String, usingCredentials credentials: ServerCredentials, callback: ((Error?) -> Void)? = nil) throws {
         guard let bluemixRequest = BluemixRequest(usingCredentials: credentials) else {
             throw AlertNotificationError.CredentialsError("Invalid URL provided.")
         }

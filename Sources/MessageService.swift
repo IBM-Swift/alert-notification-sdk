@@ -10,8 +10,8 @@ import Foundation
 
 import LoggerAPI
 
-class MessageService {
-    class func post(_ message: Message, usingCredentials credentials: ServerCredentials, callback: ((Message?, Error?) -> Void)? = nil) throws {
+public class MessageService {
+    public class func post(_ message: Message, usingCredentials credentials: ServerCredentials, callback: ((Message?, Error?) -> Void)? = nil) throws {
         guard let bluemixRequest = BluemixRequest(usingCredentials: credentials) else {
             throw AlertNotificationError.CredentialsError("Invalid URL provided.")
         }
@@ -20,7 +20,7 @@ class MessageService {
         try bluemixRequest.postMessage(message, callback: bluemixCallback)
     }
     
-    class func get(shortId id: String, usingCredentials credentials: ServerCredentials, callback: @escaping (Message?, Error?) -> Void) throws {
+    public class func get(shortId id: String, usingCredentials credentials: ServerCredentials, callback: @escaping (Message?, Error?) -> Void) throws {
         guard let bluemixRequest = BluemixRequest(usingCredentials: credentials) else {
             throw AlertNotificationError.CredentialsError("Invalid URL provided.")
         }
