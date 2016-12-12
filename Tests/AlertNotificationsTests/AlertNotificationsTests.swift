@@ -5,8 +5,8 @@ import XCTest
 
 class AlertNotificationsTests: XCTestCase {
     // Get a generic alert.
-    class func getAlertForTest() throws -> Alert {
-        return try Alert.Builder().setSummary("TestWhat").setLocation("TestWhere").setSeverity(.Fatal).setID("TestID").setDate(fromIntInMilliseconds: 0).setStatus(.Problem).setSource("TestSource").setApplicationsOrServices(["TestApps"]).setURLs([AlertURL(description: "TestDesc", URL: "TestURL")]).setDetails([Detail(name: "TestName", value: "TestValue")]).setEmailMessageToSend(EmailMessage(subject: "TestSubject", body: "TestBody")).setSMSMessageToSend("TestSMS").setVoiceMessageToSend("TestVoice").build()
+    class func getAlertForTest() -> Alert? {
+        return Alert.Builder().setSummary("TestWhat").setLocation("TestWhere").setSeverity(.Fatal).setID("TestID").setDate(fromIntInMilliseconds: 0).setStatus(.Problem).setSource("TestSource").setApplicationsOrServices(["TestApps"]).setURLs([AlertURL(description: "TestDesc", URL: "TestURL")]).setDetails([Detail(name: "TestName", value: "TestValue")]).setEmailMessageToSend(EmailMessage(subject: "TestSubject", body: "TestBody")).setSMSMessageToSend("TestSMS").setVoiceMessageToSend("TestVoice").build()
     }
     
     // Get a generic message.
@@ -49,9 +49,9 @@ class AlertNotificationsTests: XCTestCase {
     
     // Ensure that the Alert object can correctly be written out to a JSON string.
     func testAlertToJSON() throws {
-        let newAlert = try AlertNotificationsTests.getAlertForTest()
+        let newAlert = AlertNotificationsTests.getAlertForTest()
         XCTAssertNotNil(newAlert)
-        let alertBody = try newAlert.toJSONData()
+        let alertBody = try newAlert!.toJSONData()
         XCTAssertNotNil(alertBody)
         let alertJsonString = String(data: alertBody!, encoding: .utf8)
         XCTAssertNotNil(alertJsonString)
@@ -134,21 +134,18 @@ class AlertNotificationsTests: XCTestCase {
             }
         }
         
-        func deleteCallback(statusCode: Int?, error: Swift.Error?) {
+        func deleteCallback(error: Swift.Error?) {
             if error != nil {
                 XCTFail("DELETE returned with error: \(error!)")
-            } else {
-                XCTAssertNotNil(statusCode)
-                XCTAssertEqual(statusCode, 204)
             }
             
             testExpectation.fulfill()
         }
         
-        let newAlert = try AlertNotificationsTests.getAlertForTest()
+        let newAlert = AlertNotificationsTests.getAlertForTest()
         
         do {
-            let _ = try AlertService.post(newAlert, usingCredentials: credentials, callback: postCallback)
+            let _ = try AlertService.post(newAlert!, usingCredentials: credentials, callback: postCallback)
         } catch {
             XCTFail("Alert services test failed: \(error)")
         }

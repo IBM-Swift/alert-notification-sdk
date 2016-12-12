@@ -20,7 +20,7 @@ class MessageService {
         try bluemixRequest.postMessage(message, callback: bluemixCallback)
     }
     
-    class func get(shortId id: String, usingCredentials credentials: ServerCredentials, callback: ((Message?, Error?) -> Void)? = nil) throws {
+    class func get(shortId id: String, usingCredentials credentials: ServerCredentials, callback: (Message?, Error?) -> Void) throws {
         guard let bluemixRequest = BluemixRequest(usingCredentials: credentials) else {
             throw AlertNotificationError.CredentialsError("Invalid URL provided.")
         }

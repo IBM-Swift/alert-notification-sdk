@@ -20,7 +20,7 @@ class AlertService {
         try bluemixRequest.postAlert(alert, callback: bluemixCallback)
     }
     
-    class func get(shortId id: String, usingCredentials credentials: ServerCredentials, callback: ((Alert?, Error?) -> Void)? = nil) throws {
+    class func get(shortId id: String, usingCredentials credentials: ServerCredentials, callback: (Alert?, Error?) -> Void) throws {
         guard let bluemixRequest = BluemixRequest(usingCredentials: credentials) else {
             throw AlertNotificationError.CredentialsError("Invalid URL provided.")
         }
@@ -29,7 +29,7 @@ class AlertService {
         try bluemixRequest.getAlert(shortId: id, callback: bluemixCallback)
     }
     
-    class func delete(shortId id: String, usingCredentials credentials: ServerCredentials, callback: ((Int?, Error?) -> Void)? = nil) throws {
+    class func delete(shortId id: String, usingCredentials credentials: ServerCredentials, callback: ((Error?) -> Void)? = nil) throws {
         guard let bluemixRequest = BluemixRequest(usingCredentials: credentials) else {
             throw AlertNotificationError.CredentialsError("Invalid URL provided.")
         }
@@ -37,7 +37,7 @@ class AlertService {
             // Possible error #1: error received.
             if error != nil {
                 if callback != nil {
-                    callback!(nil, error)
+                    callback!(error)
                 }
                 Log.error(error!.localizedDescription)
                 return
@@ -46,7 +46,7 @@ class AlertService {
             // Possible error #2: bad response code from the server.
             guard let httpResponse = response as? HTTPURLResponse else {
                 if callback != nil {
-                    callback!(nil, AlertNotificationError.HTTPError("Could not parse the HTTP response from the server."))
+                    callback!(AlertNotificationError.HTTPError("Could not parse the HTTP response from the server."))
                 }
                 Log.error("Could not parse the HTTP response from the server.")
                 return
@@ -64,7 +64,7 @@ class AlertService {
             }
             if bluemixError != nil {
                 if callback != nil {
-                    callback!(httpResponse.statusCode, AlertNotificationError.BluemixError(bluemixError!))
+                    callback!(AlertNotificationError.BluemixError(bluemixError!))
                 }
                 Log.error(bluemixError!)
                 return
@@ -72,7 +72,7 @@ class AlertService {
             
             // Finally, perform the callback on the response.
             if callback != nil {
-                callback!(httpResponse.statusCode, nil)
+                callback!(nil)
             }
         }
     }

@@ -30,7 +30,7 @@ class Alert {
     private(set) var URLs: [AlertURL]?
     private(set) var details: [Detail]?
     private(set) var emailMessageToSend: EmailMessage?
-    private(set) var smsMessageToSend: String?
+    private(set) var SMSMessageToSend: String?
     private(set) var voiceMessageToSend: String?
     private(set) var notificationState: NotificationState?
     private(set) var firstOccurrence: Date?
@@ -53,7 +53,7 @@ class Alert {
         private var URLs: [AlertURL]?
         private var details: [Detail]?
         private var emailMessageToSend: EmailMessage?
-        private var smsMessageToSend: String?
+        private var SMSMessageToSend: String?
         private var voiceMessageToSend: String?
         
         init() {
@@ -72,7 +72,7 @@ class Alert {
             self.URLs = alert.URLs
             self.details = alert.details
             self.emailMessageToSend = alert.emailMessageToSend
-            self.smsMessageToSend = alert.smsMessageToSend
+            self.SMSMessageToSend = alert.SMSMessageToSend
             self.voiceMessageToSend = alert.voiceMessageToSend
         }
         
@@ -145,8 +145,8 @@ class Alert {
             return self
         }
         
-        func setSMSMessageToSend(_ sms: String) -> Builder {
-            self.smsMessageToSend = sms
+        func setSMSMessageToSend(_ SMS: String) -> Builder {
+            self.SMSMessageToSend = SMS
             return self
         }
         
@@ -155,11 +155,12 @@ class Alert {
             return self
         }
         
-        func build() throws -> Alert {
+        func build() -> Alert? {
             guard let summary = self.summary, let location = self.location, let severity = self.severity else {
-                throw AlertNotificationError.AlertError("Cannot build Alert object without values for variables \"summary\", \"location\" and \"severity\".")
+                Log.error("Cannot build Alert object without values for variables \"summary\", \"location\" and \"severity\".")
+                return nil
             }
-            return Alert(summary: summary, location: location, severity: severity, id: self.id, date: self.date, status: self.status, source: self.source, applicationsOrServices: self.applicationsOrServices, URLs: self.URLs, details: self.details, emailMessageToSend: self.emailMessageToSend, smsMessageToSend: self.smsMessageToSend, voiceMessageToSend: self.voiceMessageToSend)
+            return Alert(summary: summary, location: location, severity: severity, id: self.id, date: self.date, status: self.status, source: self.source, applicationsOrServices: self.applicationsOrServices, URLs: self.URLs, details: self.details, emailMessageToSend: self.emailMessageToSend, SMSMessageToSend: self.SMSMessageToSend, voiceMessageToSend: self.voiceMessageToSend)
         }
     }
     
@@ -168,7 +169,7 @@ class Alert {
      */
     
     // Base initializer.
-    private init(summary: String, location: String, severity: Severity, id: String? = nil, date: Date? = nil, status: AlertStatus? = nil, source: String? = nil, applicationsOrServices: [String]? = nil, URLs: [AlertURL]? = nil, details: [Detail]? = nil, emailMessageToSend: EmailMessage? = nil, smsMessageToSend: String? = nil, voiceMessageToSend: String? = nil) {
+    private init(summary: String, location: String, severity: Severity, id: String? = nil, date: Date? = nil, status: AlertStatus? = nil, source: String? = nil, applicationsOrServices: [String]? = nil, URLs: [AlertURL]? = nil, details: [Detail]? = nil, emailMessageToSend: EmailMessage? = nil, SMSMessageToSend: String? = nil, voiceMessageToSend: String? = nil) {
         
         self.summary = summary
         self.location = location
@@ -181,7 +182,7 @@ class Alert {
         self.URLs = URLs
         self.details = details
         self.emailMessageToSend = emailMessageToSend
-        self.smsMessageToSend = smsMessageToSend
+        self.SMSMessageToSend = SMSMessageToSend
         self.voiceMessageToSend = voiceMessageToSend
     }
     
@@ -252,8 +253,8 @@ class Alert {
             if let email = dictionary["EmailMessageToSend"] as? [String: String], let subject = email["Subject"], let body = email["Body"] {
                 self.emailMessageToSend = EmailMessage(subject: subject, body: body)
             }
-            if let sms = dictionary["SMSMessageToSend"] as? String {
-                self.smsMessageToSend = sms
+            if let SMS = dictionary["SMSMessageToSend"] as? String {
+                self.SMSMessageToSend = SMS
             }
             if let voice = dictionary["VoiceMessageToSend"] as? String {
                 self.voiceMessageToSend = voice
@@ -323,7 +324,7 @@ class Alert {
         if let alertEmail = self.emailMessageToSend {
             postDict["EmailMessageToSend"] = ["Subject": "\(alertEmail.subject)", "Body": "\(alertEmail.body)"]
         }
-        if let alertSMS = self.smsMessageToSend {
+        if let alertSMS = self.SMSMessageToSend {
             postDict["SMSMessageToSend"] = alertSMS
         }
         if let alertVoice = self.voiceMessageToSend {
