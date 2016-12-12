@@ -1,18 +1,19 @@
 {
-	"vcap": {
-		"services": {
-			"cloudantNoSQLDB": [{
-				"name": "alert-notification-sdk",
-				"label": "cloudantNoSQLDB",
-				"plan": "Shared",
-				"credentials": {
-					"username": "<username>",
-					"password": "<password>",
-					"host": "<host>",
-					"port": 443,
-					"url": "<url>"
-				}
-			}]
-		}
-	}
+  "vcap": {
+    "services": {
+      "alertnotification": [
+        {
+          "name": "alert-notification-sdk",
+          "label": "alertnotification",
+          "plan": "authorizedusers",
+          "credentials": {
+            "url": "<url>",
+            "name": "<name>",
+            "password": "<password>",
+            "swaggerui": "https://ibmnotifybm.mybluemix.net/docs/alerts/v1"
+          }
+        }
+      ]
+    }
+  }
 }
