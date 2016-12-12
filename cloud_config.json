@@ -10,14 +10,14 @@
 			"application_version": "e5e029d1-4a1a-4004-9f79-655d550183fb",
 			"application_name": "Swift-Starter",
 			"application_uris": [
-				"swift-cloudant-boilerplate.mybluemix.net"
+				"alert-notification-sdk.mybluemix.net"
 			],
 			"version": "e5e029d1-4a1a-4004-9f79-655d550183fb",
-			"name": "Swift-Starter",
+			"name": "alert-notification-sdk",
 			"space_name": "dev",
 			"space_id": "b15eb0bb-cbf3-43b6-bfbc-f76d495981e5",
 			"uris": [
-				"swift-cloudant-boilerplate.mybluemix.net"
+				"alert-notification-sdk.mybluemix.net"
 			],
 			"users": null,
 			"instance_id": "7d4f24cfba06462ba23d68aaf1d7354a",
@@ -31,7 +31,7 @@
 		},
 		"services": {
 			"cloudantNoSQLDB": [{
-				"name": "Swift-Starter-Cloudant",
+				"name": "alert-notification-sdk",
 				"label": "cloudantNoSQLDB",
 				"plan": "Shared",
 				"credentials": {
