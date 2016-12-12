@@ -283,7 +283,7 @@ class Alert {
      */
     
     // Convert this alert's contents to a JSON data object.
-    func toJSONData() throws -> Data? {
+    internal func toJSONData() throws -> Data? {
         var postDict: Dictionary<String, Any> = Dictionary<String, Any>()
         postDict["What"] = self.summary
         postDict["Where"] = self.location

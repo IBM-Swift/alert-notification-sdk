@@ -81,7 +81,7 @@ class Message {
      */
     
     // Convert to JSON.
-    func toJSONData() throws -> Data? {
+    internal func toJSONData() throws -> Data? {
         var postDict: Dictionary<String, Any> = Dictionary<String, Any>()
         postDict["Subject"] = self.subject
         postDict["Message"] = self.message

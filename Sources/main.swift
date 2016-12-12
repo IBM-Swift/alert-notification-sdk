@@ -79,7 +79,7 @@ let creds = ServerCredentials(url: "https://ibmnotifybm.mybluemix.net/api", name
 
 // Testing Alert.Builder
 
-//let testAlert = try Alert.Builder().setSummary("Sample").setLocation("SampleWhere").setSeverity(.Indeterminate).setID("Experimental").build()
+//let testAlert = try Alert.Builder().setSummary("Sample").setLocation("SampleWhere").setSeverity(.Indeterminate).setID("Experimental").setURLs([AlertURL(description: "SampleDescription", URL: "SampleURL")]).build()
 //print(testAlert.summary)
 //print(testAlert.location)
 //print(testAlert.severity)
@@ -92,12 +92,13 @@ let creds = ServerCredentials(url: "https://ibmnotifybm.mybluemix.net/api", name
 
 // Testing the Alert flow
 
-//let testAlert = try Alert.Builder().setSummary("Sample").setLocation("SampleWhere").setSeverity(.Indeterminate).setID("Experimental").build()
-//print(testAlert)
+//let testAlert = try Alert.Builder().setSummary("Sample").setLocation("SampleWhere").setSeverity(.Indeterminate).setID("Experimental").setURLs([AlertURL(description: "SampleDescription", URL: "SampleURL"),AlertURL(description: "SampleDescription2", URL: "SampleURL2")]).build()
+let testAlert = try Alert.Builder().setSummary("TestWhat").setLocation("TestWhere").setSeverity(.Fatal).setID("TestID").setDate(fromIntInMilliseconds: 0).setStatus(.Problem).setSource("TestSource").setApplicationsOrServices(["TestApps"]).setURLs([AlertURL(description: "TestDesc", URL: "TestURL"),AlertURL(description: "TestDesc2", URL: "TestURL2")]).setDetails([Detail(name: "TestName", value: "TestValue"),Detail(name: "TestName2", value: "TestValue2")]).setEmailMessageToSend(EmailMessage(subject: "TestSubject", body: "TestBody")).setSMSMessageToSend("TestSMS").setVoiceMessageToSend("TestVoice").build()
+print(testAlert)
 
-//let _ = try AlertService.post(testAlert, usingCredentials: creds, callback: testPostAlertCallback)
-//
-//while allFinished != true {}
+let _ = try AlertService.post(testAlert, usingCredentials: creds, callback: testPostAlertCallback)
+
+while allFinished != true {}
 
 //allFinished = false
 //
@@ -107,20 +108,20 @@ let creds = ServerCredentials(url: "https://ibmnotifybm.mybluemix.net/api", name
 
 //allFinished = false
 //
-//let _ = try AlertService.delete(shortId: "15-0", usingCredentials: creds, callback: testDeleteAlertCallback)
+//let _ = try AlertService.delete(shortId: "20-0", usingCredentials: creds, callback: testDeleteAlertCallback)
 //
 //while allFinished != true {}
 
 // Testing the Message flow
 
-let testMessage = Message(subject: "testSubject", message: "testMessage", recipients: [Recipient(name: "testUser", type: .User)!])!
-print("\(testMessage.subject)")
-print("\(testMessage.message)")
-print("\(testMessage.recipients)")
-
-let _ = try MessageService.post(testMessage, usingCredentials: creds, callback: testPostMessageCallback)
-
-while allFinished != true {}
+//let testMessage = Message(subject: "testSubject", message: "testMessage", recipients: [Recipient(name: "testUser", type: .User)!])!
+//print("\(testMessage.subject)")
+//print("\(testMessage.message)")
+//print("\(testMessage.recipients)")
+//
+//let _ = try MessageService.post(testMessage, usingCredentials: creds, callback: testPostMessageCallback)
+//
+//while allFinished != true {}
 
 //allFinished = false
 //
