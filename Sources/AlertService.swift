@@ -20,7 +20,7 @@ class AlertService {
         try bluemixRequest.postAlert(alert, callback: bluemixCallback)
     }
     
-    class func get(shortId id: String, usingCredentials credentials: ServerCredentials, callback: (Alert?, Error?) -> Void) throws {
+    class func get(shortId id: String, usingCredentials credentials: ServerCredentials, callback: @escaping (Alert?, Error?) -> Void) throws {
         guard let bluemixRequest = BluemixRequest(usingCredentials: credentials) else {
             throw AlertNotificationError.CredentialsError("Invalid URL provided.")
         }

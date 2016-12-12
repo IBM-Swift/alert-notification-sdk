@@ -12,7 +12,7 @@ import Foundation
  * Generic utils.
  */
 
-func createSession() -> URLSession {
+internal func createSession() -> URLSession {
     let basicConfig = URLSessionConfiguration.`default`
     return URLSession(configuration: basicConfig)
 }
@@ -83,7 +83,7 @@ enum NotificationState: String {
     case Unnotified, Notified, Acknowledged, Archived, Escalated
 }
 
-func getSeverity(from str: String) -> Severity? {
+internal func getSeverity(from str: String) -> Severity? {
     switch str.lowercased() {
         case "fatal": return .Fatal
         case "critical": return .Critical
