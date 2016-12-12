@@ -42,19 +42,19 @@ class Alert {
      * Builder.
      */
     class Builder {
-        var summary: String?
-        var location: String?
-        var severity: Severity?
-        var id: String?
-        var date: Date?
-        var status: AlertStatus?
-        var source: String?
-        var applicationsOrServices: [String]?
-        var URLs: [AlertURL]?
-        var details: [Detail]?
-        var emailMessageToSend: EmailMessage?
-        var smsMessageToSend: String?
-        var voiceMessageToSend: String?
+        private var summary: String?
+        private var location: String?
+        private var severity: Severity?
+        private var id: String?
+        private var date: Date?
+        private var status: AlertStatus?
+        private var source: String?
+        private var applicationsOrServices: [String]?
+        private var URLs: [AlertURL]?
+        private var details: [Detail]?
+        private var emailMessageToSend: EmailMessage?
+        private var smsMessageToSend: String?
+        private var voiceMessageToSend: String?
         
         init() {
             
