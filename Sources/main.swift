@@ -12,7 +12,7 @@ import LoggerAPI
 
 var allFinished: Bool = false
 
-func testPostCallback(alert: Alert?, error: Error?) {
+func testPostAlertCallback(alert: Alert?, error: Error?) {
     if error != nil {
         print("\(error!.localizedDescription)")
         print("\(error!)")
@@ -24,7 +24,7 @@ func testPostCallback(alert: Alert?, error: Error?) {
     allFinished = true
 }
 
-func testGetCallback(alert: Alert?, error: Error?) {
+func testGetAlertCallback(alert: Alert?, error: Error?) {
     if error != nil {
         print("\(error!.localizedDescription)")
         print("\(error!)")
@@ -36,13 +36,39 @@ func testGetCallback(alert: Alert?, error: Error?) {
     allFinished = true
 }
 
-func testDeleteCallback(statusCode: Int?, error: Error?) {
+func testDeleteAlertCallback(statusCode: Int?, error: Error?) {
     if error != nil {
         print("\(error!.localizedDescription)")
         print("\(error!)")
     } else {
         print("No error")
         print("\(statusCode)")
+    }
+    allFinished = true
+}
+
+func testPostMessageCallback(message: Message?, error: Error?) {
+    if error != nil {
+        print("\(error!.localizedDescription)")
+        print("\(error!)")
+    } else {
+        print("No error")
+        print("\(message)")
+        print("\(message!.subject)")
+        print("\(message!.shortId)")
+    }
+    allFinished = true
+}
+
+func testGetMessageCallback(message: Message?, error: Error?) {
+    if error != nil {
+        print("\(error!.localizedDescription)")
+        print("\(error!)")
+    } else {
+        print("No error")
+        print("\(message)")
+        print("\(message!.subject)")
+        print("\(message!.shortId)")
     }
     allFinished = true
 }
@@ -69,24 +95,37 @@ let creds = ServerCredentials(url: "https://ibmnotifybm.mybluemix.net/api", name
 //let testAlert = try Alert.Builder().setSummary("Sample").setLocation("SampleWhere").setSeverity(.Indeterminate).setID("Experimental").build()
 //print(testAlert)
 
-//let _ = try AlertService.post(testAlert, usingCredentials: creds, callback: testPostCallback)
+//let _ = try AlertService.post(testAlert, usingCredentials: creds, callback: testPostAlertCallback)
 //
 //while allFinished != true {}
 
 //allFinished = false
 //
-//let _ = try AlertService.get(shortId: "15-0", usingCredentials: creds, callback: testGetCallback)
+//let _ = try AlertService.get(shortId: "15-0", usingCredentials: creds, callback: testGetAlertCallback)
 //
 //while allFinished != true {}
 
 //allFinished = false
 //
-//let _ = try AlertService.delete(shortId: "15-0", usingCredentials: creds, callback: testDeleteCallback)
+//let _ = try AlertService.delete(shortId: "15-0", usingCredentials: creds, callback: testDeleteAlertCallback)
 //
 //while allFinished != true {}
 
 // Testing the Message flow
 
+let testMessage = Message(subject: "testSubject", message: "testMessage", recipients: [Recipient(name: "testUser", type: .User)!])!
+print("\(testMessage.subject)")
+print("\(testMessage.message)")
+print("\(testMessage.recipients)")
 
+let _ = try MessageService.post(testMessage, usingCredentials: creds, callback: testPostMessageCallback)
+
+while allFinished != true {}
+
+//allFinished = false
+//
+//let _ = try MessageService.get(shortId: "2-2", usingCredentials: creds, callback: testGetMessageCallback)
+//
+//while allFinished != true {}
 
 print("Stop")

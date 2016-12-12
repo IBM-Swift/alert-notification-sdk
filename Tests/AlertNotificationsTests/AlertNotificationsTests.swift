@@ -9,6 +9,11 @@ class AlertNotificationsTests: XCTestCase {
         return try Alert.Builder().setSummary("TestWhat").setLocation("TestWhere").setSeverity(.Fatal).setID("TestID").setDate(fromIntInMilliseconds: 0).setStatus(.Problem).setSource("TestSource").setApplicationsOrServices(["TestApps"]).setURLs([AlertURL(description: "TestDesc", URL: "TestURL")]).setDetails([Detail(name: "TestName", value: "TestValue")]).setEmailMessageToSend(EmailMessage(subject: "TestSubject", body: "TestBody")).setSMSMessageToSend("TestSMS").setVoiceMessageToSend("TestVoice").build()
     }
     
+    // Get a generic message.
+    class func getMessageForTest() throws -> Message {
+        return Message(subject: "TestSubject", message: "TestMessage", recipients: [Recipient(name: "TestUser", type: .User, broadcast: "TestBroadcast")!])!
+    }
+    
     // Get our credentials, which are filled in during CI testing.
     class func getCredentialsForTest() -> ServerCredentials {
         return ServerCredentials(url: "https://ibmnotifybm.mybluemix.net/api", name: "37921d79-f951-41ab-ae96-2144636d6852/0dc957dd-e500-4a27-8e45-6f856feb4d36", password: "QfkE673GZO+1X2MfUrYRdXTVenEgU2X6")
@@ -75,7 +80,7 @@ class AlertNotificationsTests: XCTestCase {
     
     // Run through the full POST/GET/DELETE alert suite with an actual Bluemix service.
     func testAlertServices() throws {
-        let testExpectation = expectation(description: "Runs through POST, GET and DELETE on a Bluemix instance.")
+        let testExpectation = expectation(description: "Runs through POST, GET and DELETE for alerts on a Bluemix instance.")
         var shortId: String? = nil
         let credentials = AlertNotificationsTests.getCredentialsForTest()
         
@@ -155,99 +160,94 @@ class AlertNotificationsTests: XCTestCase {
         }
     }
     
-//    // Ensure that the alert POST function works correctly.
-//    func testAlertPost() throws {
-//        let testExpectation = expectation(description: "Calls a POST request on our small Kitura server.")
-//        
-//        let newAlert = try AlertNotificationsTests.getAlertForTest()
-//        XCTAssertNotNil(newAlert)
-//        
-//        func testCallback(alert: Alert?, error: Swift.Error?) {
-//            if error != nil {
-//                XCTFail("POST returned with error: \(error!)")
-//            } else {
-//                XCTAssertNotNil(alert)
-//                XCTAssertEqual("TestID", alert!.id)
-//            }
-//            testExpectation.fulfill()
-//        }
-//        
-//        let creds = ServerCredentials(url: "http://localhost:3000", name: "foo", password: "bar")
-//        do {
-//            let _ = try newAlert.post(usingCredentials: creds, callback: testCallback)
-//        } catch AlertNotificationError.AlertError(let errorMessage) {
-//            XCTFail("POST request failed: \(errorMessage)")
-//        }
-//        
-//        waitForExpectations(timeout: 10) { error in
-//            if error != nil {
-//                XCTFail("waitForExpectations errored: \(error)")
-//            }
-//        }
-//    }
-//    
-//    // Ensure that the alert class GET function works correctly.
-//    func testAlertGet() throws {
-//        let testExpectation = expectation(description: "Calls a GET request on our small Kitura server.")
-//        
-//        func testCallback(alert: Alert?, error: Swift.Error?) {
-//            if error != nil {
-//                XCTFail("GET returned with error: \(error!)")
-//            } else {
-//                XCTAssertNotNil(alert)
-//                XCTAssertEqual("TestID", alert!.id)
-//            }
-//            testExpectation.fulfill()
-//        }
-//        
-//        let creds = ServerCredentials(url: "http://localhost:3000", name: "foo", password: "bar")
-//        do {
-//            let _ = try Alert.get(shortId: "fooId", usingCredentials: creds, callback: testCallback)
-//        } catch AlertNotificationError.AlertError(let errorMessage) {
-//            XCTFail("GET request failed: \(errorMessage)")
-//        }
-//        
-//        waitForExpectations(timeout: 10) { error in
-//            if error != nil {
-//                XCTFail("waitForExpectations errored: \(error)")
-//            }
-//        }
-//    }
-//    
-//    // Ensure that the alert class DELETE function works correctly.
-//    func testAlertDelete() throws {
-//        let testExpectation = expectation(description: "Calls a DELETE request on our small Kitura server.")
-//        
-//        func testCallback(statusCode: Int?, error: Swift.Error?) {
-//            if error != nil {
-//                XCTFail("DELETE returned with error: \(error!)")
-//            } else {
-//                XCTAssertNotNil(statusCode)
-//                XCTAssertEqual(statusCode, 204)
-//            }
-//            testExpectation.fulfill()
-//        }
-//        
-//        let creds = ServerCredentials(url: "http://localhost:3000", name: "foo", password: "bar")
-//        do {
-//            let _ = try Alert.delete(shortId: "fooId", usingCredentials: creds, callback: testCallback)
-//        } catch AlertNotificationError.AlertError(let errorMessage) {
-//            XCTFail("DELETE request failed: \(errorMessage)")
-//        }
-//        
-//        waitForExpectations(timeout: 10) { error in
-//            if error != nil {
-//                XCTFail("waitForExpectations errored: \(error)")
-//            }
-//        }
-//    }
+    // Ensure that the Message object can correctly be written out to a JSON string.
+    func testMessageToJSON() throws {
+        let newMessage = try AlertNotificationsTests.getMessageForTest()
+        XCTAssertNotNil(newMessage)
+        let messageBody = try newMessage.toJSONData()
+        XCTAssertNotNil(messageBody)
+        let messageJsonString = String(data: messageBody!, encoding: .utf8)
+        XCTAssertNotNil(messageJsonString)
+        
+        // Ensure the JSON data was written out correctly.
+        XCTAssert(messageJsonString!.contains("\"Message\":\"TestMessage\""))
+        XCTAssert(messageJsonString!.contains("\"Subject\":\"TestSubject\""))
+        XCTAssert(messageJsonString!.contains("\"Recipients\":[{"))
+        XCTAssert(messageJsonString!.contains("\"Type\":\"User\""))
+        XCTAssert(messageJsonString!.contains("\"Name\":\"TestUser\""))
+        XCTAssert(messageJsonString!.contains("\"Broadcast\":\"TestBroadcast\""))
+    }
+    
+    // Run through the full POST/GET message suite with an actual Bluemix service.
+    func testMessageServices() throws {
+        let testExpectation = expectation(description: "Runs through POST and GET for messages on a Bluemix instance.")
+        var shortId: String? = nil
+        let credentials = AlertNotificationsTests.getCredentialsForTest()
+        
+        func postCallback(message: Message?, error: Swift.Error?) {
+            if error != nil {
+                XCTFail("POST returned with error: \(error!)")
+                testExpectation.fulfill()
+            } else if message == nil {
+                XCTFail("POST request returned null Message object.")
+                testExpectation.fulfill()
+            } else {
+                XCTAssertEqual("TestSubject", message!.subject)
+                if message!.shortId != nil {
+                    shortId = message!.shortId
+                    do {
+                        try MessageService.get(shortId: shortId!, usingCredentials: credentials, callback: getCallback)
+                    } catch {
+                        XCTFail("GET failed with error: \(error)")
+                        testExpectation.fulfill()
+                    }
+                } else {
+                    XCTFail("POSTed Message object has no short ID. Cannot continue with testing.")
+                    testExpectation.fulfill()
+                }
+            }
+        }
+        
+        func getCallback(message: Message?, error: Swift.Error?) {
+            if error != nil {
+                XCTFail("GET returned with error: \(error!)")
+            } else if message == nil {
+                XCTFail("GET request returned null Message object.")
+            } else {
+                XCTAssertEqual("TestSubject", message!.subject)
+                if message!.shortId == nil {
+                    XCTFail("Message from GET request has no short ID for unknown reasons.")
+                } else if message!.shortId != shortId {
+                    XCTFail("Message from GET request has incorrect short ID for unknown reasons.")
+                }
+            }
+            
+            testExpectation.fulfill()
+        }
+        
+        let newMessage = try AlertNotificationsTests.getMessageForTest()
+        
+        do {
+            let _ = try MessageService.post(newMessage, usingCredentials: credentials, callback: postCallback)
+        } catch {
+            XCTFail("Message services test failed: \(error)")
+        }
+        
+        waitForExpectations(timeout: 60) { error in
+            if error != nil {
+                XCTFail("waitForExpectations errored: \(error)")
+            }
+        }
+    }
     
     // Test the entire flow actually going through Bluemix.
 
     static var allTests : [(String, (AlertNotificationsTests) -> () throws -> Void)] {
         return [
             ("testAlertToJSON", testAlertToJSON),
-            ("testAlertServices", testAlertServices)
+            ("testAlertServices", testAlertServices),
+            ("testMessageToJSON", testMessageToJSON),
+            ("testMessageServices", testMessageServices)
         ]
     }
 }

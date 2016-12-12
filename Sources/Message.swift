@@ -25,8 +25,14 @@ class Message {
     /*
      * Initializers.
      */
-    init(subject: String, message: String, recipients: [Recipient]) {
+    init?(subject: String, message: String, recipients: [Recipient]) {
+        if subject.characters.count > 80 {
+            return nil
+        }
         self.subject = subject
+        if message.characters.count > 1500 {
+            return nil
+        }
         self.message = message
         self.recipients = recipients
     }
