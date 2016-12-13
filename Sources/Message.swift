@@ -55,7 +55,7 @@ public class Message {
             if let recipients = dictionary["Recipients"] as? [[String: String]] {
                 var recipientArray = [Recipient]()
                 for recipient in recipients {
-                    if let name = recipient["Name"], let typeValue = recipient["Type"], let type = RecipientType(rawValue: typeValue), let newRecipient = Recipient(name: name, type: type, broadcast: recipient["Broadcast"]) {
+                    if let name = recipient["Name"], let typeValue = recipient["Type"], let type = RecipientType(rawValue: typeValue.lowercased()), let newRecipient = Recipient(name: name, type: type, broadcast: recipient["Broadcast"]) {
                         recipientArray.append(newRecipient)
                     }
                 }
@@ -90,7 +90,7 @@ public class Message {
         for recipient in self.recipients {
             var recipientDict = Dictionary<String, String>()
             recipientDict["Name"] = recipient.name
-            recipientDict["Type"] = recipient.type.rawValue
+            recipientDict["Type"] = recipient.type.rawValue.capitalized
             if let broadcast = recipient.broadcast {
                 recipientDict["Broadcast"] = broadcast
             }

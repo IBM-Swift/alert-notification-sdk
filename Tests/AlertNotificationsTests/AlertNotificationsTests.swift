@@ -6,46 +6,18 @@ import XCTest
 class AlertNotificationsTests: XCTestCase {
     // Get a generic alert.
     class func getAlertForTest() -> Alert? {
-        return Alert.Builder().setSummary("TestWhat").setLocation("TestWhere").setSeverity(.Fatal).setID("TestID").setDate(fromIntInMilliseconds: 0).setStatus(.Problem).setSource("TestSource").setApplicationsOrServices(["TestApps"]).setURLs([AlertURL(description: "TestDesc", URL: "TestURL")]).setDetails([Detail(name: "TestName", value: "TestValue")]).setEmailMessageToSend(EmailMessage(subject: "TestSubject", body: "TestBody")).setSMSMessageToSend("TestSMS").setVoiceMessageToSend("TestVoice").build()
+        return Alert.Builder().setSummary("TestWhat").setLocation("TestWhere").setSeverity(.fatal).setID("TestID").setDate(fromIntInMilliseconds: 0).setStatus(.problem).setSource("TestSource").setApplicationsOrServices(["TestApps"]).setURLs([AlertURL(description: "TestDesc", URL: "TestURL")]).setDetails([Detail(name: "TestName", value: "TestValue")]).setEmailMessageToSend(EmailMessage(subject: "TestSubject", body: "TestBody")).setSMSMessageToSend("TestSMS").setVoiceMessageToSend("TestVoice").build()
     }
     
     // Get a generic message.
     class func getMessageForTest() throws -> Message {
-        return Message(subject: "TestSubject", message: "TestMessage", recipients: [Recipient(name: "TestUser", type: .User, broadcast: "TestBroadcast")!])!
+        return Message(subject: "TestSubject", message: "TestMessage", recipients: [Recipient(name: "TestUser", type: .user, broadcast: "TestBroadcast")!])!
     }
     
     // Get our credentials, which are filled in during CI testing.
     class func getCredentialsForTest() -> ServerCredentials {
         return ServerCredentials(url: "https://ibmnotifybm.mybluemix.net/api", name: "37921d79-f951-41ab-ae96-2144636d6852/0dc957dd-e500-4a27-8e45-6f856feb4d36", password: "QfkE673GZO+1X2MfUrYRdXTVenEgU2X6")
     }
-    
-//    override class func setUp() {
-//        super.setUp()
-//        
-//        let router = Router()
-//        router.get("/alerts/v1/:id") { req, res, next in
-//            let responseAlert = try getAlertForTest()
-//            try res.send(data: responseAlert.postBody()!).end()
-//        }
-//        router.post("/alerts/v1") { req, res, next in
-//            let responseAlert = try getAlertForTest()
-//            try res.send(data: responseAlert.postBody()!).end()
-//        }
-//        router.delete("/alerts/v1/:id") { req, res, next in
-//            res.statusCode = HTTPStatusCode.noContent
-//            try res.send("Successful request").end()
-//        }
-//        
-//        Kitura.addHTTPServer(onPort: 3000, with: router)
-//        
-//        Kitura.start()
-//    }
-//    
-//    override class func tearDown() {
-//        super.tearDown()
-//        
-//        Kitura.stop()
-//    }
     
     // Ensure that the Alert object can correctly be written out to a JSON string.
     func testAlertToJSON() throws {

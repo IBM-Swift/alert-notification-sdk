@@ -48,15 +48,15 @@ internal class BluemixRequest {
     // Create KituraNet request.
     func createKituraNetRequest(to baseURL: URL, forType type: String, withMethod method: String, forID id: String? = nil, usingCredentials credentials: ServerCredentials, callback: @escaping (Data?, URLResponse?, Swift.Error?) -> Void) throws -> ClientRequest {
         guard let apiURL = URL(string: "\(type)s/v1/", relativeTo: self.baseURL) else {
-            throw AlertNotificationError.CredentialsError("Invalid URL provided.")
+            throw AlertNotificationError.credentialsError("Invalid URL provided.")
         }
         let requestURL: URL? = id != nil ? URL(string: id!, relativeTo: apiURL) : apiURL
         if requestURL == nil {
-            throw AlertNotificationError.AlertError("Invalid alert ID provided to \(method) request.")
+            throw AlertNotificationError.alertError("Invalid alert ID provided to \(method) request.")
         }
         
         guard let urlComponents = URLComponents(string: requestURL!.absoluteString), let host = urlComponents.host, let schema = urlComponents.scheme else {
-            throw AlertNotificationError.CredentialsError("Invalid URL provided.")
+            throw AlertNotificationError.credentialsError("Invalid URL provided.")
         }
         var headers = ["Authorization": "Basic \(credentials.authString)"]
         if method == "POST" {
@@ -77,6 +77,12 @@ internal class BluemixRequest {
         
         let options: [ClientRequest.Options] = [.method(method), .hostname(host), .path(urlComponents.path), .schema(schema), .headers(headers)]
         return HTTP.request(options, callback: clientCallback)
+    }
+    
+    // Create a URLSession for a request.
+    func createSession() -> URLSession {
+        let basicConfig = URLSessionConfiguration.`default`
+        return URLSession(configuration: basicConfig)
     }
     
     // Submit URLSession request.
@@ -100,7 +106,7 @@ internal class BluemixRequest {
             req.end()
         } else {
             guard let apiURL = URL(string: "alerts/v1/", relativeTo: self.baseURL) else {
-                throw AlertNotificationError.CredentialsError("Invalid URL provided.")
+                throw AlertNotificationError.credentialsError("Invalid URL provided.")
             }
             var request: URLRequest = URLRequest(url: apiURL)
             request.httpMethod = "POST"
@@ -120,10 +126,10 @@ internal class BluemixRequest {
             req.end()
         } else {
             guard let apiURL = URL(string: "alerts/v1/", relativeTo: self.baseURL) else {
-                throw AlertNotificationError.CredentialsError("Invalid URL provided.")
+                throw AlertNotificationError.credentialsError("Invalid URL provided.")
             }
             guard let fullURL = URL(string: id, relativeTo: apiURL) else {
-                throw AlertNotificationError.AlertError("Invalid alert ID provided to GET request.")
+                throw AlertNotificationError.alertError("Invalid alert ID provided to GET request.")
             }
             var request: URLRequest = URLRequest(url: fullURL)
             request.httpMethod = "GET"
@@ -139,10 +145,10 @@ internal class BluemixRequest {
             req.end()
         } else {
             guard let apiURL = URL(string: "alerts/v1/", relativeTo: self.baseURL) else {
-                throw AlertNotificationError.CredentialsError("Invalid URL provided.")
+                throw AlertNotificationError.credentialsError("Invalid URL provided.")
             }
             guard let fullURL: URL = URL(string: id, relativeTo: apiURL) else {
-                throw AlertNotificationError.AlertError("Invalid alert ID provided to DELETE request.")
+                throw AlertNotificationError.alertError("Invalid alert ID provided to DELETE request.")
             }
             var request: URLRequest = URLRequest(url: fullURL)
             request.httpMethod = "DELETE"
@@ -165,7 +171,7 @@ internal class BluemixRequest {
             req.end()
         } else {
             guard let apiURL = URL(string: "messages/v1/", relativeTo: self.baseURL) else {
-                throw AlertNotificationError.CredentialsError("Invalid URL provided.")
+                throw AlertNotificationError.credentialsError("Invalid URL provided.")
             }
             var request: URLRequest = URLRequest(url: apiURL)
             request.httpMethod = "POST"
@@ -185,10 +191,10 @@ internal class BluemixRequest {
             req.end()
         } else {
             guard let apiURL = URL(string: "messages/v1/", relativeTo: self.baseURL) else {
-                throw AlertNotificationError.CredentialsError("Invalid URL provided.")
+                throw AlertNotificationError.credentialsError("Invalid URL provided.")
             }
             guard let fullURL = URL(string: id, relativeTo: apiURL) else {
-                throw AlertNotificationError.MessageError("Invalid message ID provided to GET request.")
+                throw AlertNotificationError.messageError("Invalid message ID provided to GET request.")
             }
             var request: URLRequest = URLRequest(url: fullURL)
             request.httpMethod = "GET"

@@ -8,33 +8,24 @@
 
 import Foundation
 
-/*
- * Generic utils.
- */
-
-internal func createSession() -> URLSession {
-    let basicConfig = URLSessionConfiguration.`default`
-    return URLSession(configuration: basicConfig)
-}
-
 public enum AlertNotificationError: Error, CustomStringConvertible {
-    case AlertError(String)
-    case MessageError(String)
+    case alertError(String)
+    case messageError(String)
     case HTTPError(String)
-    case BluemixError(String)
-    case CredentialsError(String)
+    case bluemixError(String)
+    case credentialsError(String)
     
     public var description: String {
         switch self {
-        case .AlertError(let message):
+        case .alertError(let message):
             return "Alert error: \(message)"
-        case .MessageError(let message):
+        case .messageError(let message):
             return "Message error: \(message)"
         case .HTTPError(let message):
             return "HTTP error: \(message)"
-        case .BluemixError(let message):
+        case .bluemixError(let message):
             return "Bluemix error: \(message)"
-        case .CredentialsError(let message):
+        case .credentialsError(let message):
             return "Credentials error: \(message)"
         }
     }
@@ -72,26 +63,26 @@ public struct EmailMessage {
 }
 
 public enum Severity: Int {
-    case Clear = 0, Indeterminate, Warning, Minor, Major, Critical, Fatal
+    case clear = 0, indeterminate, warning, minor, major, critical, fatal
 }
 
 public enum AlertStatus: String {
-    case Problem, Acknowledged, Resolved
+    case problem, acknowledged, resolved
 }
 
 public enum NotificationState: String {
-    case Unnotified, Notified, Acknowledged, Archived, Escalated
+    case unnotified, notified, acknowledged, archived, escalated
 }
 
 internal func getSeverity(from str: String) -> Severity? {
     switch str.lowercased() {
-        case "fatal": return .Fatal
-        case "critical": return .Critical
-        case "major": return .Major
-        case "minor": return .Minor
-        case "warning": return .Warning
-        case "indeterminate": return .Indeterminate
-        case "clear": return .Clear
+        case "fatal": return .fatal
+        case "critical": return .critical
+        case "major": return .major
+        case "minor": return .minor
+        case "warning": return .warning
+        case "indeterminate": return .indeterminate
+        case "clear": return .clear
         default: return nil
     }
 }
@@ -110,12 +101,12 @@ public struct Recipient {
         self.broadcast = broadcast
         
         // In the case of an Integration message, the broadcast is required.
-        if self.type == .Integration && self.broadcast == nil {
+        if self.type == .integration && self.broadcast == nil {
             return nil
         }
     }
 }
 
 public enum RecipientType: String {
-    case User, Group, Integration
+    case user, group, integration
 }

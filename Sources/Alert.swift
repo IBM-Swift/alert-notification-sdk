@@ -105,7 +105,7 @@ public class Alert {
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
             guard let date: Date = dateFormatter.date(from: date) else {
-                throw AlertNotificationError.AlertError("Invalid String format for variable \"date\". Correct format is yyyy-MM-dd HH:mm:ss")
+                throw AlertNotificationError.alertError("Invalid String format for variable \"date\". Correct format is yyyy-MM-dd HH:mm:ss")
             }
             return self.setDate(date)
         }
@@ -223,7 +223,7 @@ public class Alert {
             } else if let date = dictionary["When"] as? Int {
                 self.date = Date(timeIntervalSince1970: (Double(date)/1000.0) as TimeInterval)
             }
-            if let status = dictionary["Type"] as? String, let statusValue = AlertStatus(rawValue: status) {
+            if let status = dictionary["Type"] as? String, let statusValue = AlertStatus(rawValue: status.lowercased()) {
                 self.status = statusValue
             }
             if let source = dictionary["Source"] as? String {
@@ -259,7 +259,7 @@ public class Alert {
             if let voice = dictionary["VoiceMessageToSend"] as? String {
                 self.voiceMessageToSend = voice
             }
-            if let notificationState = dictionary["NotificationState"] as? String, let notValue = NotificationState(rawValue: notificationState) {
+            if let notificationState = dictionary["NotificationState"] as? String, let notValue = NotificationState(rawValue: notificationState.lowercased()) {
                 self.notificationState = notValue
             }
             if let firstOccurrence = dictionary["FirstOccurrence"] as? Int {
@@ -299,7 +299,7 @@ public class Alert {
             postDict["When"] = Int(alertDate.timeIntervalSince1970 * 1000.0)
         }
         if let alertStatus = self.status {
-            postDict["Type"] = alertStatus.rawValue
+            postDict["Type"] = alertStatus.rawValue.capitalized
         }
         if let alertSource = self.source {
             postDict["Source"] = alertSource
@@ -331,7 +331,7 @@ public class Alert {
             postDict["VoiceMessageToSend"] = alertVoice
         }
         if let notState = self.notificationState {
-            postDict["NotificationState"] = notState.rawValue
+            postDict["NotificationState"] = notState.rawValue.capitalized
         }
         if let firstOccurrence = self.firstOccurrence {
             postDict["FirstOccurrence"] = Int(firstOccurrence.timeIntervalSince1970 * 1000.0)

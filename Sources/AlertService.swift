@@ -13,7 +13,7 @@ import LoggerAPI
 public class AlertService {
     public class func post(_ alert: Alert, usingCredentials credentials: ServerCredentials, callback: ((Alert?, Error?) -> Void)? = nil) throws {
         guard let bluemixRequest = BluemixRequest(usingCredentials: credentials) else {
-            throw AlertNotificationError.CredentialsError("Invalid URL provided.")
+            throw AlertNotificationError.credentialsError("Invalid URL provided.")
         }
         let errors = [208: "This error has already been reported.", 400: "The service reported an invalid request.", 401: "Authorization is invalid.", 415: "Invalid media type for alert."]
         let bluemixCallback = AlertService.alertCallbackBuilder(statusResponses: errors, withFinalCallback: callback)
@@ -22,7 +22,7 @@ public class AlertService {
     
     public class func get(shortId id: String, usingCredentials credentials: ServerCredentials, callback: @escaping (Alert?, Error?) -> Void) throws {
         guard let bluemixRequest = BluemixRequest(usingCredentials: credentials) else {
-            throw AlertNotificationError.CredentialsError("Invalid URL provided.")
+            throw AlertNotificationError.credentialsError("Invalid URL provided.")
         }
         let errors = [401: "Authorization is invalid.", 404: "An alert matching this short ID could not be found."]
         let bluemixCallback = AlertService.alertCallbackBuilder(statusResponses: errors, withFinalCallback: callback)
@@ -31,7 +31,7 @@ public class AlertService {
     
     public class func delete(shortId id: String, usingCredentials credentials: ServerCredentials, callback: ((Error?) -> Void)? = nil) throws {
         guard let bluemixRequest = BluemixRequest(usingCredentials: credentials) else {
-            throw AlertNotificationError.CredentialsError("Invalid URL provided.")
+            throw AlertNotificationError.credentialsError("Invalid URL provided.")
         }
         try bluemixRequest.deleteAlert(shortId: id) { (data, response, error) in
             // Possible error #1: error received.
@@ -64,7 +64,7 @@ public class AlertService {
             }
             if bluemixError != nil {
                 if callback != nil {
-                    callback!(AlertNotificationError.BluemixError(bluemixError!))
+                    callback!(AlertNotificationError.bluemixError(bluemixError!))
                 }
                 Log.error(bluemixError!)
                 return
@@ -108,7 +108,7 @@ public class AlertService {
             // Possible error #3: bad response code from the server.
             if let httpResponse = response as? HTTPURLResponse, let errMessage = statusResponses[httpResponse.statusCode] {
                 if callback != nil {
-                    callback!(nil, AlertNotificationError.BluemixError(errMessage))
+                    callback!(nil, AlertNotificationError.bluemixError(errMessage))
                 }
                 Log.error(errMessage)
                 return

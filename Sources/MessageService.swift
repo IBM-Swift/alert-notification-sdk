@@ -13,7 +13,7 @@ import LoggerAPI
 public class MessageService {
     public class func post(_ message: Message, usingCredentials credentials: ServerCredentials, callback: ((Message?, Error?) -> Void)? = nil) throws {
         guard let bluemixRequest = BluemixRequest(usingCredentials: credentials) else {
-            throw AlertNotificationError.CredentialsError("Invalid URL provided.")
+            throw AlertNotificationError.credentialsError("Invalid URL provided.")
         }
         let errors = [400: "The service reported an invalid request.", 401: "Authorization is invalid.", 415: "Invalid media type for message."]
         let bluemixCallback = MessageService.messageCallbackBuilder(statusResponses: errors, withFinalCallback: callback)
@@ -22,7 +22,7 @@ public class MessageService {
     
     public class func get(shortId id: String, usingCredentials credentials: ServerCredentials, callback: @escaping (Message?, Error?) -> Void) throws {
         guard let bluemixRequest = BluemixRequest(usingCredentials: credentials) else {
-            throw AlertNotificationError.CredentialsError("Invalid URL provided.")
+            throw AlertNotificationError.credentialsError("Invalid URL provided.")
         }
         let errors = [401: "Authorization is invalid.", 404: "A message matching this short ID could not be found."]
         let bluemixCallback = MessageService.messageCallbackBuilder(statusResponses: errors, withFinalCallback: callback)
@@ -60,7 +60,7 @@ public class MessageService {
             // Possible error #3: bad response code from the server.
             if let httpResponse = response as? HTTPURLResponse, let errMessage = statusResponses[httpResponse.statusCode] {
                 if callback != nil {
-                    callback!(nil, AlertNotificationError.BluemixError(errMessage))
+                    callback!(nil, AlertNotificationError.bluemixError(errMessage))
                 }
                 Log.error(errMessage)
                 return
