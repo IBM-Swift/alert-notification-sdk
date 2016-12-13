@@ -12,6 +12,48 @@ import LoggerAPI
 
 public class Alert {
     /*
+     * Internally defined classes.
+     */
+    public struct URL {
+        public let description: String
+        public let URL: String
+        public init(description: String, URL: String) {
+            self.description = description
+            self.URL = URL
+        }
+    }
+    
+    public struct Detail {
+        public let name: String
+        public let value: String
+        public init(name: String, value: String) {
+            self.name = name
+            self.value = value
+        }
+    }
+    
+    public struct EmailMessage {
+        public let subject: String
+        public let body: String
+        public init(subject: String, body: String) {
+            self.subject = subject
+            self.body = body
+        }
+    }
+    
+    public enum Severity: Int {
+        case clear = 0, indeterminate, warning, minor, major, critical, fatal
+    }
+    
+    public enum Status: String {
+        case problem, acknowledged, resolved
+    }
+    
+    public enum NotificationState: String {
+        case unnotified, notified, acknowledged, archived, escalated
+    }
+    
+    /*
      * Instance variables.
      */
     
@@ -24,10 +66,10 @@ public class Alert {
     public private(set) var id: String?
     public private(set) var shortId: String?
     public private(set) var date: Date?
-    public private(set) var status: AlertStatus?
+    public private(set) var status: Status?
     public private(set) var source: String?
     public private(set) var applicationsOrServices: [String]?
-    public private(set) var URLs: [AlertURL]?
+    public private(set) var URLs: [Alert.URL]?
     public private(set) var details: [Detail]?
     public private(set) var emailMessageToSend: EmailMessage?
     public private(set) var SMSMessageToSend: String?
@@ -47,10 +89,10 @@ public class Alert {
         private var severity: Severity?
         private var id: String?
         private var date: Date?
-        private var status: AlertStatus?
+        private var status: Status?
         private var source: String?
         private var applicationsOrServices: [String]?
-        private var URLs: [AlertURL]?
+        private var URLs: [Alert.URL]?
         private var details: [Detail]?
         private var emailMessageToSend: EmailMessage?
         private var SMSMessageToSend: String?
@@ -115,7 +157,7 @@ public class Alert {
             return self.setDate(date)
         }
         
-        public func setStatus(_ status: AlertStatus) -> Builder {
+        public func setStatus(_ status: Status) -> Builder {
             self.status = status
             return self
         }
@@ -130,7 +172,7 @@ public class Alert {
             return self
         }
         
-        public func setURLs(_ URLs: [AlertURL]) -> Builder {
+        public func setURLs(_ URLs: [Alert.URL]) -> Builder {
             self.URLs = URLs
             return self
         }
@@ -169,7 +211,7 @@ public class Alert {
      */
     
     // Base initializer.
-    private init(summary: String, location: String, severity: Severity, id: String? = nil, date: Date? = nil, status: AlertStatus? = nil, source: String? = nil, applicationsOrServices: [String]? = nil, URLs: [AlertURL]? = nil, details: [Detail]? = nil, emailMessageToSend: EmailMessage? = nil, SMSMessageToSend: String? = nil, voiceMessageToSend: String? = nil) {
+    private init(summary: String, location: String, severity: Severity, id: String? = nil, date: Date? = nil, status: Status? = nil, source: String? = nil, applicationsOrServices: [String]? = nil, URLs: [Alert.URL]? = nil, details: [Detail]? = nil, emailMessageToSend: EmailMessage? = nil, SMSMessageToSend: String? = nil, voiceMessageToSend: String? = nil) {
         
         self.summary = summary
         self.location = location
@@ -201,7 +243,7 @@ public class Alert {
             } else {
                 return nil
             }
-            if let severity = dictionary["Severity"] as? String, let sevValue = getSeverity(from: severity) {
+            if let severity = dictionary["Severity"] as? String, let sevValue = Alert.getSeverity(from: severity) {
                 self.severity = sevValue
             } else if let severity = dictionary["Severity"] as? Int, let sevValue = Severity(rawValue: severity) {
                 self.severity = sevValue
@@ -223,7 +265,7 @@ public class Alert {
             } else if let date = dictionary["When"] as? Int {
                 self.date = Date(timeIntervalSince1970: (Double(date)/1000.0) as TimeInterval)
             }
-            if let status = dictionary["Type"] as? String, let statusValue = AlertStatus(rawValue: status.lowercased()) {
+            if let status = dictionary["Type"] as? String, let statusValue = Status(rawValue: status.lowercased()) {
                 self.status = statusValue
             }
             if let source = dictionary["Source"] as? String {
@@ -233,10 +275,10 @@ public class Alert {
                 self.applicationsOrServices = apps
             }
             if let URLs = dictionary["URLs"] as? [[String: String]] {
-                var URLarray = [AlertURL]()
+                var URLarray = Array<Alert.URL>()
                 for alertURL in URLs {
                     if let description = alertURL["Description"], let URLvalue = alertURL["URL"] {
-                        URLarray.append(AlertURL(description: description, URL: URLvalue))
+                        URLarray.append(Alert.URL(description: description, URL: URLvalue))
                     }
                 }
                 self.URLs = URLarray
@@ -347,5 +389,21 @@ public class Alert {
         }
         
         return try JSONSerialization.data(withJSONObject: postDict, options: [])
+    }
+    
+    /*
+     * Class functions.
+     */
+    internal class func getSeverity(from str: String) -> Severity? {
+        switch str.lowercased() {
+        case "fatal": return .fatal
+        case "critical": return .critical
+        case "major": return .major
+        case "minor": return .minor
+        case "warning": return .warning
+        case "indeterminate": return .indeterminate
+        case "clear": return .clear
+        default: return nil
+        }
     }
 }

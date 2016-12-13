@@ -92,7 +92,7 @@ let creds = ServerCredentials(url: "https://ibmnotifybm.mybluemix.net/api", name
 // Testing the Alert flow
 
 //let testAlert = try Alert.Builder().setSummary("Sample").setLocation("SampleWhere").setSeverity(.indeterminate).setID("Experimental").setURLs([AlertURL(description: "SampleDescription", URL: "SampleURL"),AlertURL(description: "SampleDescription2", URL: "SampleURL2")]).build()
-let testAlert = Alert.Builder().setSummary("TestWhat").setLocation("TestWhere").setSeverity(.fatal).setID("TestID").setDate(fromIntInMilliseconds: 0).setStatus(.problem).setSource("TestSource").setApplicationsOrServices(["TestApps"]).setURLs([AlertURL(description: "TestDesc", URL: "TestURL"),AlertURL(description: "TestDesc2", URL: "TestURL2")]).setDetails([Detail(name: "TestName", value: "TestValue"),Detail(name: "TestName2", value: "TestValue2")]).setEmailMessageToSend(EmailMessage(subject: "TestSubject", body: "TestBody")).setSMSMessageToSend("TestSMS").setVoiceMessageToSend("TestVoice").build()
+let testAlert = Alert.Builder().setSummary("TestWhat").setLocation("TestWhere").setSeverity(.fatal).setID("TestID").setDate(fromIntInMilliseconds: 0).setStatus(.problem).setSource("TestSource").setApplicationsOrServices(["TestApps"]).setURLs([Alert.URL(description: "TestDesc", URL: "TestURL"),Alert.URL(description: "TestDesc2", URL: "TestURL2")]).setDetails([Alert.Detail(name: "TestName", value: "TestValue"),Alert.Detail(name: "TestName2", value: "TestValue2")]).setEmailMessageToSend(Alert.EmailMessage(subject: "TestSubject", body: "TestBody")).setSMSMessageToSend("TestSMS").setVoiceMessageToSend("TestVoice").build()
 print(testAlert!)
 
 let _ = try AlertService.post(testAlert!, usingCredentials: creds, callback: testPostAlertCallback)

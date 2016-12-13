@@ -6,12 +6,12 @@ import XCTest
 class AlertNotificationsTests: XCTestCase {
     // Get a generic alert.
     class func getAlertForTest() -> Alert? {
-        return Alert.Builder().setSummary("TestWhat").setLocation("TestWhere").setSeverity(.fatal).setID("TestID").setDate(fromIntInMilliseconds: 0).setStatus(.problem).setSource("TestSource").setApplicationsOrServices(["TestApps"]).setURLs([AlertURL(description: "TestDesc", URL: "TestURL")]).setDetails([Detail(name: "TestName", value: "TestValue")]).setEmailMessageToSend(EmailMessage(subject: "TestSubject", body: "TestBody")).setSMSMessageToSend("TestSMS").setVoiceMessageToSend("TestVoice").build()
+        return Alert.Builder().setSummary("TestWhat").setLocation("TestWhere").setSeverity(.fatal).setID("TestID").setDate(fromIntInMilliseconds: 0).setStatus(.problem).setSource("TestSource").setApplicationsOrServices(["TestApps"]).setURLs([Alert.URL(description: "TestDesc", URL: "TestURL")]).setDetails([Alert.Detail(name: "TestName", value: "TestValue")]).setEmailMessageToSend(Alert.EmailMessage(subject: "TestSubject", body: "TestBody")).setSMSMessageToSend("TestSMS").setVoiceMessageToSend("TestVoice").build()
     }
     
     // Get a generic message.
     class func getMessageForTest() throws -> Message {
-        return Message(subject: "TestSubject", message: "TestMessage", recipients: [Recipient(name: "TestUser", type: .user, broadcast: "TestBroadcast")!])!
+        return Message(subject: "TestSubject", message: "TestMessage", recipients: [Message.Recipient(name: "TestUser", type: .user, broadcast: "TestBroadcast")!])!
     }
     
     // Get our credentials, which are filled in during CI testing.

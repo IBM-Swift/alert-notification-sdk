@@ -10,6 +10,29 @@ import Foundation
 
 public class Message {
     /*
+     * Internally defined classes.
+     */
+    public struct Recipient {
+        public let name: String
+        public let type: RecipientType
+        public var broadcast: String?
+        public init?(name: String, type: RecipientType, broadcast: String? = nil) {
+            self.name = name
+            self.type = type
+            self.broadcast = broadcast
+            
+            // In the case of an Integration message, the broadcast is required.
+            if self.type == .integration && self.broadcast == nil {
+                return nil
+            }
+        }
+    }
+    
+    public enum RecipientType: String {
+        case user, group, integration
+    }
+    
+    /*
      * Instance variables.
      */
     
