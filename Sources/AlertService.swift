@@ -11,47 +11,37 @@ import Foundation
 import LoggerAPI
 
 public class AlertService {
-    public class func post(_ alert: Alert, usingCredentials credentials: ServerCredentials, callback: ((Alert?, Error?) -> Void)? = nil) throws {
-        guard let bluemixRequest = BluemixRequest(usingCredentials: credentials) else {
-            throw AlertNotificationError.credentialsError("Invalid URL provided.")
-        }
+    public class func post(_ alert: Alert, usingCredentials credentials: AlertServiceCredentials, callback: ((Alert?, Error?) -> Void)? = nil) throws {
+        let bluemixRequest = try BluemixRequest(usingCredentials: credentials)
         let errors = [208: "This error has already been reported.", 400: "The service reported an invalid request.", 401: "Authorization is invalid.", 415: "Invalid media type for alert."]
         let bluemixCallback = AlertService.alertCallbackBuilder(statusResponses: errors, withFinalCallback: callback)
         try bluemixRequest.postAlert(alert, callback: bluemixCallback)
     }
     
-    public class func get(shortId id: String, usingCredentials credentials: ServerCredentials, callback: @escaping (Alert?, Error?) -> Void) throws {
-        guard let bluemixRequest = BluemixRequest(usingCredentials: credentials) else {
-            throw AlertNotificationError.credentialsError("Invalid URL provided.")
-        }
+    public class func get(shortId id: String, usingCredentials credentials: AlertServiceCredentials, callback: @escaping (Alert?, Error?) -> Void) throws {
+        let bluemixRequest = try BluemixRequest(usingCredentials: credentials)
         let errors = [401: "Authorization is invalid.", 404: "An alert matching this short ID could not be found."]
         let bluemixCallback = AlertService.alertCallbackBuilder(statusResponses: errors, withFinalCallback: callback)
         try bluemixRequest.getAlert(shortId: id, callback: bluemixCallback)
     }
     
-    public class func delete(shortId id: String, usingCredentials credentials: ServerCredentials, callback: ((Error?) -> Void)? = nil) throws {
-        guard let bluemixRequest = BluemixRequest(usingCredentials: credentials) else {
-            throw AlertNotificationError.credentialsError("Invalid URL provided.")
-        }
+    public class func delete(shortId id: String, usingCredentials credentials: AlertServiceCredentials, callback: ((Error?) -> Void)? = nil) throws {
+        let bluemixRequest = try BluemixRequest(usingCredentials: credentials)
         try bluemixRequest.deleteAlert(shortId: id) { (data, response, error) in
             // Possible error #1: error received.
-            if error != nil {
-                if callback != nil {
-                    callback!(error)
-                }
-                Log.error(error!.localizedDescription)
+            if let error = error {
+                callback?(error)
+                Log.error(error.localizedDescription)
                 return
             }
             
             // Possible error #2: bad response code from the server.
             guard let httpResponse = response as? HTTPURLResponse else {
-                if callback != nil {
-                    callback!(AlertNotificationError.HTTPError("Could not parse the HTTP response from the server."))
-                }
+                callback?(AlertNotificationError.HTTPError("Could not parse the HTTP response from the server."))
                 Log.error("Could not parse the HTTP response from the server.")
                 return
             }
-            var bluemixError: String? = nil
+            var bluemixError: String?
             switch httpResponse.statusCode {
             case 401:
                 bluemixError = "Authorization is invalid."
@@ -62,70 +52,54 @@ public class AlertService {
             default:
                 break
             }
-            if bluemixError != nil {
-                if callback != nil {
-                    callback!(AlertNotificationError.bluemixError(bluemixError!))
-                }
-                Log.error(bluemixError!)
+            if let bluemixError = bluemixError {
+                callback?(AlertNotificationError.bluemixError(bluemixError))
+                Log.error(bluemixError)
                 return
             }
             
             // Finally, perform the callback on the response.
-            if callback != nil {
-                callback!(nil)
-            }
+            callback?(nil)
         }
     }
     
     // Create a callback function for when we are expecting an Alert object in response.
     private class func alertCallbackBuilder(statusResponses: [Int: String], withFinalCallback callback: ((Alert?, Error?) -> Void)? = nil) -> (Data?, URLResponse?, Swift.Error?) -> Void {
         return { (data: Data?, response: URLResponse?, error: Swift.Error?) in
-            // Possible error #1: no data received.
-            if data == nil {
-                if callback != nil {
-                    if error == nil {
-                        callback!(nil, AlertNotificationError.HTTPError("Payload from server is empty."))
-                    } else {
-                        callback!(nil, error)
-                    }
-                }
-                Log.error("Payload from server is empty.")
-                if error != nil {
-                    Log.error(error!.localizedDescription)
-                }
+            // Possible error #1: error received.
+            if let error = error {
+                callback?(nil, error)
+                Log.error(error.localizedDescription)
                 return
             }
             
-            // Possible error #2: error received.
-            if error != nil {
-                if callback != nil {
-                    callback!(nil, error)
-                }
-                Log.error(error!.localizedDescription)
-                return
-            }
-            
-            // Possible error #3: bad response code from the server.
+            // Possible error #2: bad response code from the server.
             if let httpResponse = response as? HTTPURLResponse, let errMessage = statusResponses[httpResponse.statusCode] {
-                if callback != nil {
-                    callback!(nil, AlertNotificationError.bluemixError(errMessage))
-                }
+                callback?(nil, AlertNotificationError.bluemixError(errMessage))
                 Log.error(errMessage)
                 return
             }
             
-            // Possible error #4: malformed response data.
-            guard let alertResponse = Alert(data: data!) else {
-                if callback != nil {
-                    callback!(nil, AlertNotificationError.HTTPError("Malformed response from server."))
+            if let data = data {
+                // Possible error #3: malformed response data.
+                guard let alertResponse = Alert(data: data) else {
+                    callback?(nil, AlertNotificationError.HTTPError("Malformed response from server."))
+                    Log.error("Malformed response from server.")
+                    return
                 }
-                Log.error("Malformed response from server.")
-                return
-            }
             
-            // Finally, perform the callback on the data.
-            if callback != nil {
-                callback!(alertResponse, nil)
+                // Perform the callback on the data, because we succeeded.
+                callback?(alertResponse, nil)
+            } else {
+                // Possible error #4: no data received.
+                if let error = error {
+                    callback?(nil, error)
+                    Log.error(error.localizedDescription)
+                } else {
+                    callback?(nil, AlertNotificationError.HTTPError("Payload from server is empty."))
+                }
+                Log.error("Payload from server is empty.")
+                return
             }
         }
     }

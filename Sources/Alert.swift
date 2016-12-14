@@ -197,10 +197,15 @@ public class Alert {
             return self
         }
         
-        public func build() -> Alert? {
-            guard let summary = self.summary, let location = self.location, let severity = self.severity else {
-                Log.error("Cannot build Alert object without values for variables \"summary\", \"location\" and \"severity\".")
-                return nil
+        public func build() throws -> Alert {
+            guard let summary = self.summary else {
+                throw AlertNotificationError.alertError("Cannot build Alert object without value for variable  \"summary\".")
+            }
+            guard let location = self.location else {
+                throw AlertNotificationError.alertError("Cannot build Alert object without value for variable  \"location\".")
+            }
+            guard let severity = self.severity else {
+                throw AlertNotificationError.alertError("Cannot build Alert object without value for variable  \"severity\".")
             }
             return Alert(summary: summary, location: location, severity: severity, id: self.id, date: self.date, status: self.status, source: self.source, applicationsOrServices: self.applicationsOrServices, URLs: self.URLs, details: self.details, emailMessageToSend: self.emailMessageToSend, SMSMessageToSend: self.SMSMessageToSend, voiceMessageToSend: self.voiceMessageToSend)
         }

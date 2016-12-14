@@ -16,14 +16,14 @@ public class Message {
         public let name: String
         public let type: RecipientType
         public var broadcast: String?
-        public init?(name: String, type: RecipientType, broadcast: String? = nil) {
+        public init(name: String, type: RecipientType, broadcast: String? = nil) throws {
             self.name = name
             self.type = type
             self.broadcast = broadcast
             
             // In the case of an Integration message, the broadcast is required.
             if self.type == .integration && self.broadcast == nil {
-                return nil
+                throw AlertNotificationError.messageError("The \"broadcast\" property must be provided for recipients of type .integration.")
             }
         }
     }
@@ -48,13 +48,13 @@ public class Message {
     /*
      * Initializers.
      */
-    public init?(subject: String, message: String, recipients: [Recipient]) {
+    public init(subject: String, message: String, recipients: [Recipient]) throws {
         if subject.characters.count > 80 {
-            return nil
+            throw AlertNotificationError.messageError("Message subject cannot be longer than 80 characters.")
         }
         self.subject = subject
         if message.characters.count > 1500 {
-            return nil
+            throw AlertNotificationError.messageError("Message body cannot be longer than 1500 characters.")
         }
         self.message = message
         self.recipients = recipients
@@ -78,7 +78,7 @@ public class Message {
             if let recipients = dictionary["Recipients"] as? [[String: String]] {
                 var recipientArray = [Recipient]()
                 for recipient in recipients {
-                    if let name = recipient["Name"], let typeValue = recipient["Type"], let type = RecipientType(rawValue: typeValue.lowercased()), let newRecipient = Recipient(name: name, type: type, broadcast: recipient["Broadcast"]) {
+                    if let name = recipient["Name"], let typeValue = recipient["Type"], let type = RecipientType(rawValue: typeValue.lowercased()), let newRecipient = try? Recipient(name: name, type: type, broadcast: recipient["Broadcast"]) {
                         recipientArray.append(newRecipient)
                     }
                 }

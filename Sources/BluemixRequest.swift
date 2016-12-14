@@ -21,41 +21,46 @@ internal class BluemixRequest {
     
     // Common variables.
     let baseURL: URL
-    let credentials: ServerCredentials
+    let credentials: AlertServiceCredentials
     
     // Initializer.
-    init?(usingCredentials credentials: ServerCredentials) {
+    init(usingCredentials credentials: AlertServiceCredentials) throws {
         self.credentials = credentials
         guard let baseURL = URL(string: "\(credentials.url)/") else {
-            Log.error("Invalid URL provided.")
-            return nil
+            throw AlertNotificationError.credentialsError("Invalid URL provided.")
         }
         self.baseURL = baseURL
     }
     
     // Convert a Kitura response to a HTTPURLResponse.
     func convertResponse(_ response: ClientResponse?) -> HTTPURLResponse? {
-        if response == nil {
-            return nil
-        }
-        
-        guard let httpResponse = HTTPURLResponse(url: response!.urlComponents.url!, statusCode: response!.status, httpVersion: "HTTP/\(response!.httpVersionMajor).\(response!.httpVersionMinor)", headerFields: nil) else {
+        guard let responseURL = response?.urlComponents.url, let responseStatus = response?.status, let httpResponse = HTTPURLResponse(url: responseURL, statusCode: responseStatus, httpVersion: "HTTP/\(response?.httpVersionMajor).\(response?.httpVersionMinor)", headerFields: nil) else {
             return nil
         }
         return httpResponse
     }
     
-    // Create KituraNet request.
-    func createKituraNetRequest(to baseURL: URL, forType type: String, withMethod method: String, forID id: String? = nil, usingCredentials credentials: ServerCredentials, callback: @escaping (Data?, URLResponse?, Swift.Error?) -> Void) throws -> ClientRequest {
+    // Create a URL for a KituraNet request.
+    func createKituraNetURL(to baseURL: URL, forType type: String, withMethod method: String, withID id: String?) throws -> URL {
         guard let apiURL = URL(string: "\(type)s/v1/", relativeTo: self.baseURL) else {
             throw AlertNotificationError.credentialsError("Invalid URL provided.")
         }
-        let requestURL: URL? = id != nil ? URL(string: id!, relativeTo: apiURL) : apiURL
-        if requestURL == nil {
+        var requestURL: URL? = apiURL
+        if let id = id {
+            requestURL = URL(string: id, relativeTo: apiURL)
+        }
+        guard let finalURL = requestURL else {
             throw AlertNotificationError.alertError("Invalid alert ID provided to \(method) request.")
         }
         
-        guard let urlComponents = URLComponents(string: requestURL!.absoluteString), let host = urlComponents.host, let schema = urlComponents.scheme else {
+        return finalURL
+    }
+    
+    // Create KituraNet request.
+    func createKituraNetRequest(to baseURL: URL, forType type: String, withMethod method: String, forID id: String? = nil, usingCredentials credentials: AlertServiceCredentials, callback: @escaping (Data?, URLResponse?, Swift.Error?) -> Void) throws -> ClientRequest {
+        let requestURL = try createKituraNetURL(to: baseURL, forType: type, withMethod: method, withID: id)
+        
+        guard let urlComponents = URLComponents(string: requestURL.absoluteString), let host = urlComponents.host, let schema = urlComponents.scheme else {
             throw AlertNotificationError.credentialsError("Invalid URL provided.")
         }
         var headers = ["Authorization": "Basic \(credentials.authString)"]
@@ -67,7 +72,7 @@ internal class BluemixRequest {
             let httpResponse = self.convertResponse(response)
             do {
                 let dataString = try response?.readString()
-                let responseData = dataString != nil ? dataString!.data(using: String.Encoding.utf8) : nil
+                let responseData = dataString?.data(using: String.Encoding.utf8)
                 callback(responseData, httpResponse, nil)
             } catch {
                 Log.error(error.localizedDescription)
@@ -101,8 +106,10 @@ internal class BluemixRequest {
         if self.USE_KITURA_NET {
             let req: ClientRequest = try self.createKituraNetRequest(to: self.baseURL, forType: "alert", withMethod: "POST", usingCredentials: credentials, callback: callback)
             
-            let alertJSON = try alert.toJSONData()
-            req.write(from: alertJSON!)
+            guard let alertJSON = try alert.toJSONData() else {
+                throw AlertNotificationError.alertError("Error forming POST request to server: could not convert alert object to JSON.")
+            }
+            req.write(from: alertJSON)
             req.end()
         } else {
             guard let apiURL = URL(string: "alerts/v1/", relativeTo: self.baseURL) else {
@@ -166,8 +173,10 @@ internal class BluemixRequest {
         if self.USE_KITURA_NET {
             let req: ClientRequest = try self.createKituraNetRequest(to: self.baseURL, forType: "message", withMethod: "POST", usingCredentials: credentials, callback: callback)
             
-            let messageJSON = try message.toJSONData()
-            req.write(from: messageJSON!)
+            guard let messageJSON = try message.toJSONData() else {
+                throw AlertNotificationError.messageError("Error forming POST request to server: could not convert message object to JSON.")
+            }
+            req.write(from: messageJSON)
             req.end()
         } else {
             guard let apiURL = URL(string: "messages/v1/", relativeTo: self.baseURL) else {

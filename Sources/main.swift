@@ -13,9 +13,9 @@ import LoggerAPI
 var allFinished: Bool = false
 
 func testPostAlertCallback(alert: Alert?, error: Error?) {
-    if error != nil {
-        print("\(error!.localizedDescription)")
-        print("\(error!)")
+    if let error = error {
+        print("\(error.localizedDescription)")
+        print("\(error)")
     } else {
         print("No error")
         print("\(alert)")
@@ -25,9 +25,9 @@ func testPostAlertCallback(alert: Alert?, error: Error?) {
 }
 
 func testGetAlertCallback(alert: Alert?, error: Error?) {
-    if error != nil {
-        print("\(error!.localizedDescription)")
-        print("\(error!)")
+    if let error = error {
+        print("\(error.localizedDescription)")
+        print("\(error)")
     } else {
         print("No error")
         print("\(alert)")
@@ -37,9 +37,9 @@ func testGetAlertCallback(alert: Alert?, error: Error?) {
 }
 
 func testDeleteAlertCallback(error: Error?) {
-    if error != nil {
-        print("\(error!.localizedDescription)")
-        print("\(error!)")
+    if let error = error {
+        print("\(error.localizedDescription)")
+        print("\(error)")
     } else {
         print("No error")
     }
@@ -47,55 +47,55 @@ func testDeleteAlertCallback(error: Error?) {
 }
 
 func testPostMessageCallback(message: Message?, error: Error?) {
-    if error != nil {
-        print("\(error!.localizedDescription)")
-        print("\(error!)")
+    if let error = error {
+        print("\(error.localizedDescription)")
+        print("\(error)")
     } else {
         print("No error")
         print("\(message)")
-        print("\(message!.subject)")
-        print("\(message!.shortId)")
+        print("\(message?.subject)")
+        print("\(message?.shortId)")
     }
     allFinished = true
 }
 
 func testGetMessageCallback(message: Message?, error: Error?) {
-    if error != nil {
-        print("\(error!.localizedDescription)")
-        print("\(error!)")
+    if let error = error {
+        print("\(error.localizedDescription)")
+        print("\(error)")
     } else {
         print("No error")
         print("\(message)")
-        print("\(message!.subject)")
-        print("\(message!.shortId)")
+        print("\(message?.subject)")
+        print("\(message?.shortId)")
     }
     allFinished = true
 }
 
 print("Go")
 
-let creds = ServerCredentials(url: "https://ibmnotifybm.mybluemix.net/api", name: "37921d79-f951-41ab-ae96-2144636d6852/0dc957dd-e500-4a27-8e45-6f856feb4d36", password: "QfkE673GZO+1X2MfUrYRdXTVenEgU2X6")
+let creds = AlertServiceCredentials(url: "https://ibmnotifybm.mybluemix.net/api", name: "37921d79-f951-41ab-ae96-2144636d6852/0dc957dd-e500-4a27-8e45-6f856feb4d36", password: "QfkE673GZO+1X2MfUrYRdXTVenEgU2X6")
 
 // Testing Alert.Builder
 
-//let testAlert = Alert.Builder().setSummary("Sample").setLocation("SampleWhere").setSeverity(.indeterminate).setID("Experimental").setURLs([AlertURL(description: "SampleDescription", URL: "SampleURL")]).build()
-//print(testAlert!.summary)
-//print(testAlert!.location)
-//print(testAlert!.severity)
-//print(testAlert!.id)
-//let testAlert2 = Alert.Builder(from: testAlert).setSummary("Sample2").build()
-//print(testAlert2!.summary)
-//print(testAlert2!.location)
-//print(testAlert2!.severity)
-//print(testAlert2!.id)
+//let testAlert = try Alert.Builder().setSummary("Sample").setLocation("SampleWhere").setSeverity(.indeterminate).setID("Experimental").setURLs([AlertURL(description: "SampleDescription", URL: "SampleURL")]).build()
+//print(testAlert.summary)
+//print(testAlert.location)
+//print(testAlert.severity)
+//print(testAlert.id)
+//let testAlert2 = try Alert.Builder(from: testAlert).setSummary("Sample2").build()
+//print(testAlert2.summary)
+//print(testAlert2.location)
+//print(testAlert2.severity)
+//print(testAlert2.id)
 
 // Testing the Alert flow
 
 //let testAlert = try Alert.Builder().setSummary("Sample").setLocation("SampleWhere").setSeverity(.indeterminate).setID("Experimental").setURLs([AlertURL(description: "SampleDescription", URL: "SampleURL"),AlertURL(description: "SampleDescription2", URL: "SampleURL2")]).build()
-let testAlert = Alert.Builder().setSummary("TestWhat").setLocation("TestWhere").setSeverity(.fatal).setID("TestID").setDate(fromIntInMilliseconds: 0).setStatus(.problem).setSource("TestSource").setApplicationsOrServices(["TestApps"]).setURLs([Alert.URL(description: "TestDesc", URL: "TestURL"),Alert.URL(description: "TestDesc2", URL: "TestURL2")]).setDetails([Alert.Detail(name: "TestName", value: "TestValue"),Alert.Detail(name: "TestName2", value: "TestValue2")]).setEmailMessageToSend(Alert.EmailMessage(subject: "TestSubject", body: "TestBody")).setSMSMessageToSend("TestSMS").setVoiceMessageToSend("TestVoice").build()
-print(testAlert!)
+let testAlert = try Alert.Builder().setSummary("TestWhat").setLocation("TestWhere").setSeverity(.fatal).setID("TestID").setDate(fromIntInMilliseconds: 0).setStatus(.problem).setSource("TestSource").setApplicationsOrServices(["TestApps"]).setURLs([Alert.URL(description: "TestDesc", URL: "TestURL"),Alert.URL(description: "TestDesc2", URL: "TestURL2")]).setDetails([Alert.Detail(name: "TestName", value: "TestValue"),Alert.Detail(name: "TestName2", value: "TestValue2")]).setEmailMessageToSend(Alert.EmailMessage(subject: "TestSubject", body: "TestBody")).setSMSMessageToSend("TestSMS").setVoiceMessageToSend("TestVoice").build()
+print(testAlert)
 
-let _ = try AlertService.post(testAlert!, usingCredentials: creds, callback: testPostAlertCallback)
+let _ = try AlertService.post(testAlert, usingCredentials: creds, callback: testPostAlertCallback)
 
 while allFinished != true {}
 
@@ -113,7 +113,7 @@ while allFinished != true {}
 
 // Testing the Message flow
 
-//let testMessage = Message(subject: "testSubject", message: "testMessage", recipients: [Recipient(name: "testUser", type: .User)!])!
+//let testMessage = try Message(subject: "testSubject", message: "testMessage", recipients: [Recipient(name: "testUser", type: .User)?])
 //print("\(testMessage.subject)")
 //print("\(testMessage.message)")
 //print("\(testMessage.recipients)")
