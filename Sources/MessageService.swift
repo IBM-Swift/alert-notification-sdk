@@ -11,14 +11,14 @@ import Foundation
 import LoggerAPI
 
 public class MessageService {
-    public class func post(_ message: Message, usingCredentials credentials: AlertServiceCredentials, callback: ((Message?, Error?) -> Void)? = nil) throws {
+    public class func post(_ message: Message, usingCredentials credentials: ServiceCredentials, callback: ((Message?, Error?) -> Void)? = nil) throws {
         let bluemixRequest = try BluemixRequest(usingCredentials: credentials)
         let errors = [400: "The service reported an invalid request.", 401: "Authorization is invalid.", 415: "Invalid media type for message."]
         let bluemixCallback = MessageService.messageCallbackBuilder(statusResponses: errors, withFinalCallback: callback)
         try bluemixRequest.postMessage(message, callback: bluemixCallback)
     }
     
-    public class func get(shortId id: String, usingCredentials credentials: AlertServiceCredentials, callback: @escaping (Message?, Error?) -> Void) throws {
+    public class func get(shortId id: String, usingCredentials credentials: ServiceCredentials, callback: @escaping (Message?, Error?) -> Void) throws {
         let bluemixRequest = try BluemixRequest(usingCredentials: credentials)
         let errors = [401: "Authorization is invalid.", 404: "A message matching this short ID could not be found."]
         let bluemixCallback = MessageService.messageCallbackBuilder(statusResponses: errors, withFinalCallback: callback)

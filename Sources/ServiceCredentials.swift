@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct AlertServiceCredentials {
+public struct ServiceCredentials {
     public let url: String
     public let name: String
     public let password: String

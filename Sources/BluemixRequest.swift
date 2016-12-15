@@ -21,10 +21,10 @@ internal class BluemixRequest {
     
     // Common variables.
     let baseURL: URL
-    let credentials: AlertServiceCredentials
+    let credentials: ServiceCredentials
     
     // Initializer.
-    init(usingCredentials credentials: AlertServiceCredentials) throws {
+    init(usingCredentials credentials: ServiceCredentials) throws {
         self.credentials = credentials
         guard let baseURL = URL(string: "\(credentials.url)/") else {
             throw AlertNotificationError.credentialsError("Invalid URL provided.")
@@ -57,7 +57,7 @@ internal class BluemixRequest {
     }
     
     // Create KituraNet request.
-    func createKituraNetRequest(to baseURL: URL, forType type: String, withMethod method: String, forID id: String? = nil, usingCredentials credentials: AlertServiceCredentials, callback: @escaping (Data?, URLResponse?, Swift.Error?) -> Void) throws -> ClientRequest {
+    func createKituraNetRequest(to baseURL: URL, forType type: String, withMethod method: String, forID id: String? = nil, usingCredentials credentials: ServiceCredentials, callback: @escaping (Data?, URLResponse?, Swift.Error?) -> Void) throws -> ClientRequest {
         let requestURL = try createKituraNetURL(to: baseURL, forType: type, withMethod: method, withID: id)
         
         guard let urlComponents = URLComponents(string: requestURL.absoluteString), let host = urlComponents.host, let schema = urlComponents.scheme else {

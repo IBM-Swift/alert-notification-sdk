@@ -76,7 +76,7 @@ func testGetMessageCallback(message: Message?, error: Error?) {
 
 print("Go")
 
-let creds = AlertServiceCredentials(url: "https://ibmnotifybm.mybluemix.net/api", name: "37921d79-f951-41ab-ae96-2144636d6852/0dc957dd-e500-4a27-8e45-6f856feb4d36", password: "QfkE673GZO+1X2MfUrYRdXTVenEgU2X6")
+let creds = ServiceCredentials(url: "https://ibmnotifybm.mybluemix.net/api", name: "37921d79-f951-41ab-ae96-2144636d6852/0dc957dd-e500-4a27-8e45-6f856feb4d36", password: "QfkE673GZO+1X2MfUrYRdXTVenEgU2X6")
 
 let testAlert = try Alert.Builder().setSummary("TestWhat").setLocation("TestWhere").setSeverity(.fatal).setID("TestID").setDate(fromIntInMilliseconds: 0).setStatus(.problem).setSource("TestSource").setApplicationsOrServices(["TestApps"]).setURLs([Alert.URL(description: "TestDesc", URL: "TestURL"),Alert.URL(description: "TestDesc2", URL: "TestURL2")]).setDetails([Alert.Detail(name: "TestName", value: "TestValue"),Alert.Detail(name: "TestName2", value: "TestValue2")]).setEmailMessageToSend(Alert.EmailMessage(subject: "TestSubject", body: "TestBody")).setSMSMessageToSend("TestSMS").setVoiceMessageToSend("TestVoice").build()
 print(testAlert)

@@ -11,21 +11,21 @@ import Foundation
 import LoggerAPI
 
 public class AlertService {
-    public class func post(_ alert: Alert, usingCredentials credentials: AlertServiceCredentials, callback: ((Alert?, Error?) -> Void)? = nil) throws {
+    public class func post(_ alert: Alert, usingCredentials credentials: ServiceCredentials, callback: ((Alert?, Error?) -> Void)? = nil) throws {
         let bluemixRequest = try BluemixRequest(usingCredentials: credentials)
         let errors = [208: "This error has already been reported.", 400: "The service reported an invalid request.", 401: "Authorization is invalid.", 415: "Invalid media type for alert."]
         let bluemixCallback = AlertService.alertCallbackBuilder(statusResponses: errors, withFinalCallback: callback)
         try bluemixRequest.postAlert(alert, callback: bluemixCallback)
     }
     
-    public class func get(shortId id: String, usingCredentials credentials: AlertServiceCredentials, callback: @escaping (Alert?, Error?) -> Void) throws {
+    public class func get(shortId id: String, usingCredentials credentials: ServiceCredentials, callback: @escaping (Alert?, Error?) -> Void) throws {
         let bluemixRequest = try BluemixRequest(usingCredentials: credentials)
         let errors = [401: "Authorization is invalid.", 404: "An alert matching this short ID could not be found."]
         let bluemixCallback = AlertService.alertCallbackBuilder(statusResponses: errors, withFinalCallback: callback)
         try bluemixRequest.getAlert(shortId: id, callback: bluemixCallback)
     }
     
-    public class func delete(shortId id: String, usingCredentials credentials: AlertServiceCredentials, callback: ((Error?) -> Void)? = nil) throws {
+    public class func delete(shortId id: String, usingCredentials credentials: ServiceCredentials, callback: ((Error?) -> Void)? = nil) throws {
         let bluemixRequest = try BluemixRequest(usingCredentials: credentials)
         try bluemixRequest.deleteAlert(shortId: id) { (data, response, error) in
             // Possible error #1: error received.
