@@ -8,8 +8,6 @@
 
 import Foundation
 
-import LoggerAPI
-
 public class Alert {
     /*
      * Internally defined classes.

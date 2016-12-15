@@ -38,9 +38,9 @@ In order to use all of the features of the Alert Notifications SDK, you need an 
 
 Once you have a credential created, select "View Credentials" and take note of the information that appears there. You will need the entire `name` and `password` fields for your application, but **you should only use the `url` field up to and including `/api/`.** Do not include any portions of the `url` that come after that.
 
-Using this information, you should create an `AlertServiceCredentials` object in your application, which will be used in all functions that create, retrieve or delete alerts or messages.
+Using this information, you should create a `ServiceCredentials` object in your application, which will be used in all functions that create, retrieve or delete alerts or messages.
 
-    let credentials = AlertServiceCredentials(url: "<url>", name: "<name>", password: "<password>")
+    let credentials = ServiceCredentials(url: "<url>", name: "<name>", password: "<password>")
 
 API
 ---
@@ -162,17 +162,17 @@ When all of the desired properties are set, the `build()` function will complete
 
 ### AlertService
 
-The `AlertService` class is a static class used to create, retrieve and delete alerts from the Alert Notification service. All of the API functions are asynchronous, so callback functions must be provided if the application is to use the data returned from them. In order to authenticate with the service, an `AlertServiceCredentials` object is required for all functions (see "Credentials Setup" above). The following methods are provided:
+The `AlertService` class is a static class used to create, retrieve and delete alerts from the Alert Notification service. All of the API functions are asynchronous, so callback functions must be provided if the application is to use the data returned from them. In order to authenticate with the service, a `ServiceCredentials` object is required for all functions (see "Credentials Setup" above). The following methods are provided:
 
-    AlertService.post(_: Alert, usingCredentials: AlertServiceCredentials, callback: ((Alert?, Error?) -> Void)? = nil) throws
+    AlertService.post(_: Alert, usingCredentials: ServiceCredentials, callback: ((Alert?, Error?) -> Void)? = nil) throws
 
 Posts a provided `Alert` object to the Alert Notification service. The service returns an `Alert` object with additional fields initialized, such as `shortId`. While optional, a callback function with the signature `(Alert?, Error?) -> Void` must be included in order to view this returned alert or any possible errors. This method only throws errors that occur before the underlying POST request is made, or while making the request; any errors that occur after this point are passed through the callback function.
 
-    AlertService.get(shortId: String, usingCredentials: AlertServiceCredentials, callback: (Alert?, Error?) -> Void) throws
+    AlertService.get(shortId: String, usingCredentials: ServiceCredentials, callback: (Alert?, Error?) -> Void) throws
 
 Retrieves an `Alert` object from the Alert Notification service corresponding to the provided `shortId` parameter. Note that this is not the same as the `id` parameter that is used for deduplication. Unlike the `post` function, a callback function with the signature `(Alert?, Error?) -> Void` is required for this method. This method only throws errors that occur before the underlying GET request is made, or while making the request; any errors that occur after this point are passed through the callback function.
 
-    AlertService.delete(shortId: String, usingCredentials: AlertServiceCredentials, callback: ((Error?) -> Void)? = nil) throws
+    AlertService.delete(shortId: String, usingCredentials: ServiceCredentials, callback: ((Error?) -> Void)? = nil) throws
 
 Deletes an `Alert` object from the Alert Notification service corresponding to the provided `shortId` parameter. Note that this is not the same as the `id` parameter that is used for deduplication. An optional callback function with the signature `(Error?) -> Void` is required to view errors that may return from the Alert Notification service. This method only throws errors that occur before the underlying DELETE request is made, or while making the request; any errors that occur after this point are passed through the callback function.
 
@@ -213,13 +213,13 @@ The `Message.RecipientType` type indicates which kind of recipient a `Message.Re
 
 ### MessageService
 
-The `MessageService` class is a static class used to create and retrieve messages from the Alert Notification service. All of the API functions are asynchronous, so callback functions must be provided if the application is to use the data returned from them. In order to authenticate with the service, an `AlertServiceCredentials` object is required for all functions (see "Credentials Setup" above). The following methods are provided:
+The `MessageService` class is a static class used to create and retrieve messages from the Alert Notification service. All of the API functions are asynchronous, so callback functions must be provided if the application is to use the data returned from them. In order to authenticate with the service, a `ServiceCredentials` object is required for all functions (see "Credentials Setup" above). The following methods are provided:
 
-    MessageService.post(_: Message, usingCredentials: AlertServiceCredentials, callback: ((Message?, Error?) -> Void)? = nil) throws
+    MessageService.post(_: Message, usingCredentials: ServiceCredentials, callback: ((Message?, Error?) -> Void)? = nil) throws
 
 Posts a provided `Message` object to the Alert Notification service. The service returns a `Message` object with additional fields initialized, such as `shortId`. While optional, a callback function with the signature `(Message?, Error?) -> Void` must be included in order to view this returned message or any possible errors. This method only throws errors that occur before the underlying POST request is made, or while making the request; any errors that occur after this point are passed through the callback function.
 
-    MessageService.get(shortId: String, usingCredentials: AlertServiceCredentials, callback: (Message?, Error?) -> Void) throws
+    MessageService.get(shortId: String, usingCredentials: ServiceCredentials, callback: (Message?, Error?) -> Void) throws
 
 Retrieves a `Message` object from the Alert Notification service corresponding to the provided `shortId` parameter. Note that this is not the same as the `id` parameter that is used for deduplication. Unlike the `post` function, a callback function with the signature `(Message?, Error?) -> Void` is required for this method. This method only throws errors that occur before the underlying GET request is made, or while making the request; any errors that occur after this point are passed through the callback function.
 
