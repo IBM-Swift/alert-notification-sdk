@@ -15,8 +15,8 @@ class AlertNotificationsTests: XCTestCase {
     }
     
     // Get our credentials, which are filled in during CI testing.
-    class func getCredentialsForTest() -> ServiceCredentials {
-        return AlertServiceCredentials(url: "https://ibmnotifybm.mybluemix.net/api", name: "37921d79-f951-41ab-ae96-2144636d6852/0dc957dd-e500-4a27-8e45-6f856feb4d36", password: "QfkE673GZO+1X2MfUrYRdXTVenEgU2X6")
+    class func getCredentialsForTest() throws -> ServiceCredentials {
+        return try Configuration().getAlertNotificationSDKProps()
     }
     
     // Ensure that the Alert object can correctly be written out to a JSON string.
@@ -58,7 +58,7 @@ class AlertNotificationsTests: XCTestCase {
     func testAlertServices() throws {
         let testExpectation = expectation(description: "Runs through POST, GET and DELETE for alerts on a Bluemix instance.")
         var shortId: String? = nil
-        let credentials = AlertNotificationsTests.getCredentialsForTest()
+        let credentials = try AlertNotificationsTests.getCredentialsForTest()
         
         func postCallback(alert: Alert?, error: Swift.Error?) {
             if let error = error {
@@ -172,7 +172,7 @@ class AlertNotificationsTests: XCTestCase {
     func testMessageServices() throws {
         let testExpectation = expectation(description: "Runs through POST and GET for messages on a Bluemix instance.")
         var shortId: String? = nil
-        let credentials = AlertNotificationsTests.getCredentialsForTest()
+        let credentials = try AlertNotificationsTests.getCredentialsForTest()
         
         func postCallback(message: Message?, error: Swift.Error?) {
             if let error = error {

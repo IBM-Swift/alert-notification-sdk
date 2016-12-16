@@ -13,7 +13,7 @@ import LoggerAPI
 import CloudFoundryEnv
 
 public struct Configuration {
-    let configurationFile = "cloud_config.json"
+    let configurationFile = "Tests/cloud_config.json"
     let appEnv: AppEnv
     
     init() throws {

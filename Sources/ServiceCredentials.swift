@@ -19,7 +19,7 @@ public struct ServiceCredentials {
         }
     }
     
-    init(url: String, name: String, password: String) {
+    public init(url: String, name: String, password: String) {
         self.url = url
         self.name = name
         self.password = password
