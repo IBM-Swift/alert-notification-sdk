@@ -1,3 +1,8 @@
+[![Build Status - Develop](https://travis-ci.org/IBM-Swift/alert-notification-sdk.svg?branch=develop)](https://travis-ci.org/IBM-Swift/alert-notification-sdk)
+[![Build Status - Master](https://travis-ci.org/IBM-Swift/alert-notification-sdk.svg?branch=master)](https://travis-ci.org/IBM-Swift/alert-notification-sdk)
+![macOS](https://img.shields.io/badge/os-macOS-green.svg?style=flat)
+![Linux](https://img.shields.io/badge/os-linux-green.svg?style=flat)
+
 Alert Notification Service SDK
 ===============================
 
@@ -8,7 +13,7 @@ This SDK supports the proactive remediation of issues for applications running o
 Swift Version
 -------------
 
-The Alert Notification SDK works with the `3.0.1` release version of the Swift binaries. You can download this version from [Swift.org](https://swift.org/download/#releases).
+The Alert Notification SDK works with the `3.0.2` release version of the Swift binaries. You can download this version from [Swift.org](https://swift.org/download/#releases).
 
 Usage
 -----
@@ -222,6 +227,17 @@ Posts a provided `Message` object to the Alert Notification service. The service
     MessageService.get(shortId: String, usingCredentials: ServiceCredentials, callback: (Message?, Error?) -> Void) throws
 
 Retrieves a `Message` object from the Alert Notification service corresponding to the provided `shortId` parameter. Note that this is not the same as the `id` parameter that is used for deduplication. Unlike the `post` function, a callback function with the signature `(Message?, Error?) -> Void` is required for this method. This method only throws errors that occur before the underlying GET request is made, or while making the request; any errors that occur after this point are passed through the callback function.
+ 
+### ServiceCredentials
+
+The `ServiceCredentials` class is used to specify authentication credentials for the Alert Notification service on Bluemix. This is the object that is passed into all `AlertService` and `MessageService` functions. A `ServiceCredentials` object has the following required properties, directly corresponding to the credentials found in the Bluemix service (see the "Credentials Setup") section above:
+* `url` - The URL that the SDK will connect to in order to create, retrieve and delete alerts or messages. Note that you should only include the URL provided in the service credentials up to and including `/api/`.
+* `name` - The user name for the service.
+* `password` - The password used to authenticate with the service.
+
+All of the `ServiceCredentials` properties are immutable, and cannot be changed after the object is created. The object only has one method, the constructor:
+
+    ServiceCredentials(url: String, name: String, password: String)
 
 License
 -------
