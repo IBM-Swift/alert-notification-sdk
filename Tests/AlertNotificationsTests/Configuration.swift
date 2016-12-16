@@ -7,15 +7,12 @@
 //
 
 import Foundation
-import LoggerAPI
+import AlertNotifications
 import SwiftyJSON
+import LoggerAPI
 import CloudFoundryEnv
 
 public struct Configuration {
-    public enum AlertNotificationError: Error {
-        case IO(String)
-    }
-    
     let configurationFile = "cloud_config.json"
     let appEnv: AppEnv
     
@@ -44,7 +41,7 @@ public struct Configuration {
                 return credentials
             }
         }
-        throw AlertNotificationError.IO("Failed to obtain database service and/or its credentials.")
+        throw AlertNotificationError.credentialsError("Failed to obtain database service and/or its credentials.")
     }
     
     private static func getAbsolutePath(relativePath: String, useFallback: Bool) -> String? {
