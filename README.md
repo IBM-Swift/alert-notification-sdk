@@ -6,9 +6,9 @@
 Alert Notification Service SDK
 ===============================
 
-This SDK is for the consumption/usage of the Alert Notification service and not for administration of the service.
-
-This SDK supports the proactive remediation of issues for applications running on the Bluemix cloud.
+The Alert Notification Service SDK allows Swift developers to utilize the Alert Notifications Bluemix service in their applications, allowing for the proactive remediation of issues for applications running on the Bluemix cloud. Alerts and messages can be created, received and deleted through the use of this SDK. The servive can be acquired at [this link](https://console.ng.bluemix.net/catalog/services/ibm-alert-notification/), and the documentation is available at [this link](https://console.ng.bluemix.net/docs/services/AlertNotification/index.html); both links may require a Bluemix account to access. A non-Bluemix Quick Start Guide can be viewed on the [IBM website](https://www.ibm.com/blogs/bluemix/2015/12/quick-start-guide-to-alert-notification-service/).
+ 
+This SDK is for the consumption/usage of the Alert Notification service and not for administration of the service. Adding users, groups, notification policies, etc. should be done through the Bluemix dashboard.
 
 Swift Version
 -------------
