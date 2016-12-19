@@ -122,7 +122,7 @@ The `Alert.Severity` type indicates the level of severity associated with an ale
 
 #### Alert.Status
 
-The `Alert.Status` type indicates whether or not an alert has been acknowledged or reesolved. The type is an enum with the following possible values:
+The `Alert.Status` type indicates whether or not an alert has been acknowledged or resolved. The type is an enum with the following possible values:
 * `.problem` - The alert has been posted but no action has been taken.
 * `.acknowledged` - The alert has been seen and acknowledged, and action is being taken to resolve it.
 * `.resolved` - The alert has been resolved.
@@ -163,7 +163,7 @@ Each of the above methods returns an `Alert.Builder` object, so they can be chai
 
     Alert.Builder().setSummary("summary").setLocation("location").setSeverity(.fatal).build()
 
-When all of the desired properties are set, the `build()` function will complete the build and return an `Alert` object. If the `summary`, `location` or `severity` variables are not set, `build()` will return `nil`.
+When all of the desired properties are set, the `build()` function will complete the build and return an `Alert` object. If the `summary`, `location` or `severity` variables are not set, `build()` will throw an error.
 
 ### AlertService
 
@@ -194,9 +194,9 @@ A `Message` may contain two more properties when it is sent by the Alert Notific
 
 All of the properties of a `Message` are immutable. Once a `Message` is created, it cannot be modified.
 
-Unlike the `Alert` class, the `Message` class does not have a builder, and uses a simple constructor. If the length restrictions on `subject` or `message` are violated, the constructor will return `nil`.
+Unlike the `Alert` class, the `Message` class does not have a builder, and uses a simple constructor. If the length restrictions on `subject` or `message` are violated, the constructor will throw an error.
 
-    Message?(subject: String, message: String, recipients: [Message.Recipient])
+    Message(subject: String, message: String, recipients: [Message.Recipient]) throws
 
 #### Message.Recipient
 
@@ -205,9 +205,9 @@ The `Message.Recipient` object is used to specify a person, group or integration
 * `type` - A `Message.RecipientType` property indicating which kind of recipient this is (see `Message.RecipientType` below).
 * `broadcast` - A `String` used to indicate which integration this recipient is intended to hook into. This property is only required if the `type` is `.integration`.
 
-A `Message.Recipient` only has one method, the constructor. If the `type` is `.integration` and the `broadcast` property is `nil`, this constructor will return `nil`.
+A `Message.Recipient` only has one method, the constructor. If the `type` is `.integration` and the `broadcast` property is `nil`, this constructor will throw an error.
 
-    Message.Recipient?(name: String, type: Message.RecipientType, broadcast: String? = nil)
+    Message.Recipient(name: String, type: Message.RecipientType, broadcast: String? = nil) throws
 
 #### Message.RecipientType
 
