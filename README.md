@@ -41,7 +41,7 @@ Credentials Setup
 
 In order to use all of the features of the Alert Notifications SDK, you need an instance of the Alert Notifications service (be aware that this is a paid service only). Once you have obtained an instance of this service, select it from your Bluemix dashboard, and then click the "Service Credentials" tab. Create a credential if you have not already.
 
-Once you have a credential created, select "View Credentials" and take note of the information that appears there. You will need the entire `name` and `password` fields for your application, but **you should only use the `url` field up to and including `/api/`.** Do not include any portions of the `url` that come after that.
+Once you have a credential created, select "View Credentials" and take note of the information that appears there. You will need the entire `name` and `password` fields for your application, but **you should only use the `url` field up to and including `/api`.** Do not include any portions of the `url` that come after that.
 
 Using this information, you should create a `ServiceCredentials` object in your application, which will be used in all functions that create, retrieve or delete alerts or messages.
 
@@ -231,7 +231,7 @@ Retrieves a `Message` object from the Alert Notification service corresponding t
 ### ServiceCredentials
 
 The `ServiceCredentials` class is used to specify authentication credentials for the Alert Notification service on Bluemix. This is the object that is passed into all `AlertService` and `MessageService` functions. A `ServiceCredentials` object has the following required properties, directly corresponding to the credentials found in the Bluemix service (see the "Credentials Setup") section above:
-* `url` - The URL that the SDK will connect to in order to create, retrieve and delete alerts or messages. Note that you should only include the URL provided in the service credentials up to and including `/api/`.
+* `url` - The URL that the SDK will connect to in order to create, retrieve and delete alerts or messages. Note that you should only include the URL provided in the service credentials up to and including `/api`.
 * `name` - The user name for the service.
 * `password` - The password used to authenticate with the service.
 

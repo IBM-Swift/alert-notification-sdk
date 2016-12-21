@@ -37,11 +37,21 @@ public struct Configuration {
             if let url = alertCredentials["url"].string,
             let name = alertCredentials["name"].string,
             let password = alertCredentials["password"].string {
-                let credentials = ServiceCredentials(url: url, name: name, password: password)
+                let credentials = ServiceCredentials(url: Configuration.removeTrailingSlash(from: url), name: name, password: password)
                 return credentials
             }
         }
         throw AlertNotificationError.credentialsError("Failed to obtain database service and/or its credentials.")
+    }
+    
+    private static func removeTrailingSlash(from url: String) -> String {
+        var urlCopy = url
+        var lastIndex = url.index(urlCopy.startIndex, offsetBy: urlCopy.characters.count-1)
+        while urlCopy.characters.count > 1 && urlCopy[lastIndex] == "/" {
+            urlCopy = urlCopy.substring(to: lastIndex)
+            lastIndex = url.index(urlCopy.startIndex, offsetBy: urlCopy.characters.count-1)
+        }
+        return urlCopy
     }
     
     private static func getAbsolutePath(relativePath: String, useFallback: Bool) -> String? {
