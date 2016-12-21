@@ -13,7 +13,7 @@ import KituraNet
 import LoggerAPI
 
 internal class BluemixRequest {
-    let USE_KITURA_NET: Bool = false
+    let USE_KITURA_NET: Bool = true
     
     /*
      * Instance veriables and methods.

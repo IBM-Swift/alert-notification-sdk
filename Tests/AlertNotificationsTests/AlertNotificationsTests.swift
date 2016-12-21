@@ -79,9 +79,7 @@ class AlertNotificationsTests: XCTestCase {
             }
             shortId = alertId
             do {
-                /////////////////////////////////////
                 try AlertService.get(shortId: shortId!, usingCredentials: credentials, callback: getCallback)
-                /////////////////////////////////////
             } catch {
                 XCTFail("GET failed with error: \(error)")
                 testExpectation.fulfill()
@@ -111,9 +109,7 @@ class AlertNotificationsTests: XCTestCase {
                 return
             }
             do {
-                /////////////////////////////////////
                 try AlertService.delete(shortId: shortId!, usingCredentials: credentials, callback: deleteCallback)
-                /////////////////////////////////////
             } catch {
                 XCTFail("DELETE failed with error: \(error)")
                 testExpectation.fulfill()
@@ -131,15 +127,13 @@ class AlertNotificationsTests: XCTestCase {
         let newAlert = try AlertNotificationsTests.getAlertForTest()
         
         do {
-            /////////////////////////////////////
             try AlertService.post(newAlert, usingCredentials: credentials, callback: postCallback)
-            /////////////////////////////////////
         } catch {
             XCTFail("Alert services test failed: \(error)")
             testExpectation.fulfill()
         }
         
-        waitForExpectations(timeout: 600) { error in
+        waitForExpectations(timeout: 60) { error in
             if error != nil {
                 XCTFail("waitForExpectations errored: \(error)")
             }
