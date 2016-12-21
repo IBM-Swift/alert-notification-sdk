@@ -83,7 +83,7 @@ public class AlertService {
             if let data = data {
                 // Possible error #3: malformed response data.
                 guard let alertResponse = Alert(data: data) else {
-                    callback?(nil, AlertNotificationError.HTTPError("Malformed response from server."))
+                    callback?(nil, AlertNotificationError.HTTPError("Malformed response from server: \(String(data: data, encoding: .utf8))"))
                     Log.error("Malformed response from server.")
                     return
                 }
