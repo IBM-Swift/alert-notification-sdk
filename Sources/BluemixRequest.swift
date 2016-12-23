@@ -12,7 +12,7 @@ import KituraNet
 
 import LoggerAPI
 
-internal class BluemixRequest {
+class BluemixRequest {
     #if os(macOS)
     let USE_KITURA_NET: Bool = false
     #else

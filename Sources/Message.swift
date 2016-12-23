@@ -61,7 +61,7 @@ public class Message {
     }
     
     // Create a Message from a JSON string.
-    internal init?(data: Data) {
+    init?(data: Data) {
         let json = try? JSONSerialization.jsonObject(with: data, options: [])
         if let dictionary = json as? [String: Any] {
             // Mandatory properties.
@@ -104,7 +104,7 @@ public class Message {
      */
     
     // Convert to JSON.
-    internal func toJSONData() throws -> Data? {
+    func toJSONData() throws -> Data? {
         var postDict: Dictionary<String, Any> = Dictionary<String, Any>()
         postDict["Subject"] = self.subject
         postDict["Message"] = self.message

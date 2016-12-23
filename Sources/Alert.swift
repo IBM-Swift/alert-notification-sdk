@@ -232,7 +232,7 @@ public class Alert {
     }
     
     // JSON initializer.
-    internal init?(data: Data) {
+    init?(data: Data) {
         let json = try? JSONSerialization.jsonObject(with: data, options: [])
         if let dictionary = json as? [String: Any] {
             // Mandatory properties.
@@ -329,7 +329,7 @@ public class Alert {
      */
     
     // Convert this alert's contents to a JSON data object.
-    internal func toJSONData() throws -> Data? {
+    func toJSONData() throws -> Data? {
         var postDict: Dictionary<String, Any> = Dictionary<String, Any>()
         postDict["What"] = self.summary
         postDict["Where"] = self.location
@@ -397,7 +397,7 @@ public class Alert {
     /*
      * Class functions.
      */
-    internal class func getSeverity(from str: String) -> Severity? {
+    class func getSeverity(from str: String) -> Severity? {
         switch str.lowercased() {
         case "fatal": return .fatal
         case "critical": return .critical

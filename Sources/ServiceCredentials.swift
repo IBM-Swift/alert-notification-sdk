@@ -12,7 +12,7 @@ public struct ServiceCredentials {
     public let url: String
     public let name: String
     public let password: String
-    internal var authString: String {
+    var authString: String {
         get {
             let rawString = "\(name):\(password)"
             return rawString.data(using: .utf8)!.base64EncodedString()
