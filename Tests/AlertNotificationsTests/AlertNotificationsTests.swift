@@ -187,9 +187,7 @@ class AlertNotificationsTests: XCTestCase {
             }
             shortId = messageId
             do {
-                /////////////////////////////////////
                 try MessageService.get(shortId: shortId!, usingCredentials: credentials, callback: getCallback)
-                /////////////////////////////////////
             } catch {
                 XCTFail("GET failed with error: \(error)")
                 testExpectation.fulfill()
@@ -223,9 +221,7 @@ class AlertNotificationsTests: XCTestCase {
         let newMessage = try AlertNotificationsTests.getMessageForTest()
         
         do {
-            /////////////////////////////////////
             try MessageService.post(newMessage, usingCredentials: credentials, callback: postCallback)
-            /////////////////////////////////////
         } catch {
             XCTFail("Message services test failed: \(error)")
             testExpectation.fulfill()

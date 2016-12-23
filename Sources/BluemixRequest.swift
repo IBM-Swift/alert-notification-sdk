@@ -88,20 +88,6 @@ internal class BluemixRequest {
         return HTTP.request(options, callback: clientCallback)
     }
     
-    // Create a URLSession for a request.
-    func createSession() -> URLSession {
-        let basicConfig = URLSessionConfiguration.`default`
-        return URLSession(configuration: basicConfig)
-    }
-    
-    // Submit URLSession request.
-    func sendRequest(req: URLRequest, callback: @escaping (Data?, URLResponse?, Swift.Error?) -> Void) {
-        let session: URLSession = createSession()
-        let reqTask = session.dataTask(with: req, completionHandler: callback)
-        reqTask.resume()
-        session.finishTasksAndInvalidate()
-    }
-    
     /*
      * Alert requests.
      */
@@ -127,7 +113,7 @@ internal class BluemixRequest {
             let alertJSON = try alert.toJSONData()
             request.httpBody = alertJSON
             
-            self.sendRequest(req: request, callback: callback)
+            SharedSession.sendRequest(req: request, callback: callback)
         }
     }
     
@@ -146,7 +132,7 @@ internal class BluemixRequest {
             request.httpMethod = "GET"
             request.setValue("Basic \(credentials.authString)", forHTTPHeaderField: "Authorization")
             
-            self.sendRequest(req: request, callback: callback)
+            SharedSession.sendRequest(req: request, callback: callback)
         }
     }
     
@@ -165,7 +151,7 @@ internal class BluemixRequest {
             request.httpMethod = "DELETE"
             request.setValue("Basic \(credentials.authString)", forHTTPHeaderField: "Authorization")
             
-            self.sendRequest(req: request, callback: callback)
+            SharedSession.sendRequest(req: request, callback: callback)
         }
     }
     
@@ -194,7 +180,7 @@ internal class BluemixRequest {
             let messageJSON = try message.toJSONData()
             request.httpBody = messageJSON
             
-            self.sendRequest(req: request, callback: callback)
+            SharedSession.sendRequest(req: request, callback: callback)
         }
     }
     
@@ -213,7 +199,7 @@ internal class BluemixRequest {
             request.httpMethod = "GET"
             request.setValue("Basic \(credentials.authString)", forHTTPHeaderField: "Authorization")
             
-            self.sendRequest(req: request, callback: callback)
+            SharedSession.sendRequest(req: request, callback: callback)
         }
     }
 }
