@@ -1,5 +1,4 @@
-[![Build Status - Develop](https://api.travis-ci.com/IBM-Swift/alert-notification-sdk.svg?token=mJT5PYB2xpM2BrzG4qWD&branch=develop)](https://travis-ci.org/IBM-Swift/alert-notification-sdk)
-[![Build Status - Master](https://api.travis-ci.com/IBM-Swift/alert-notification-sdk.svg?token=mJT5PYB2xpM2BrzG4qWD&branch=master)](https://travis-ci.org/IBM-Swift/alert-notification-sdk)
+[![Build Status - Develop](https://api.travis-ci.com/IBM-Swift/alert-notification-sdk.svg?token=mJT5PYB2xpM2BrzG4qWD&branch=develop)](https://travis-ci.com/IBM-Swift/alert-notification-sdk)
 ![macOS](https://img.shields.io/badge/os-macOS-green.svg?style=flat)
 ![Linux](https://img.shields.io/badge/os-linux-green.svg?style=flat)
 
