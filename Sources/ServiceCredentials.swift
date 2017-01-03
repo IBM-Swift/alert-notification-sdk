@@ -20,8 +20,18 @@ public struct ServiceCredentials {
     }
     
     public init(url: String, name: String, password: String) {
-        self.url = url
+        self.url = ServiceCredentials.removeTrailingSlash(from: url)
         self.name = name
         self.password = password
+    }
+    
+    private static func removeTrailingSlash(from url: String) -> String {
+        var urlCopy = url
+        var lastIndex = url.index(urlCopy.startIndex, offsetBy: urlCopy.characters.count-1)
+        while urlCopy.characters.count > 1 && urlCopy[lastIndex] == "/" {
+            urlCopy = urlCopy.substring(to: lastIndex)
+            lastIndex = url.index(urlCopy.startIndex, offsetBy: urlCopy.characters.count-1)
+        }
+        return urlCopy
     }
 }
