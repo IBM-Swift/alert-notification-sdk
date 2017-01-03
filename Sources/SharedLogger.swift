@@ -6,4 +6,13 @@
 //
 //
 
-import Foundation
+import LoggerAPI
+import HeliumLogger
+
+class SharedLogger {
+    private static let sharedInstance = SharedLogger()
+    
+    private init() {
+        Log.logger = HeliumLogger()
+    }
+}
