@@ -38,7 +38,7 @@ class BluemixRequest {
     
     // Convert a Kitura response to a HTTPURLResponse.
     func convertResponse(_ response: ClientResponse?) -> HTTPURLResponse? {
-        guard let responseURL = response?.urlComponents.url, let responseStatus = response?.status, let httpResponse = HTTPURLResponse(url: responseURL, statusCode: responseStatus, httpVersion: "HTTP/\(response?.httpVersionMajor).\(response?.httpVersionMinor)", headerFields: nil) else {
+        guard let responseURL = response?.urlURL, let responseStatus = response?.status, let httpResponse = HTTPURLResponse(url: responseURL, statusCode: responseStatus, httpVersion: "HTTP/\(response?.httpVersionMajor).\(response?.httpVersionMinor)", headerFields: nil) else {
             return nil
         }
         return httpResponse
