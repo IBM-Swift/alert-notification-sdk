@@ -16,6 +16,10 @@ public struct Configuration {
     let configurationFile = "Tests/cloud_config.json"
     let appEnv: AppEnv
     
+    public enum ConfigError: Error {
+        case Error(String)
+    }
+    
     init(withFile configFile: String) throws {
         configurationFile = configFile
         let path = Configuration.getAbsolutePath(relativePath: "/\(configurationFile)", useFallback: false)
