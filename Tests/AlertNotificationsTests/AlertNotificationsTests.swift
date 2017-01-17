@@ -16,7 +16,7 @@ class AlertNotificationsTests: XCTestCase {
     
     // Get our credentials, which are filled in during CI testing.
     class func getCredentialsForTest() throws -> ServiceCredentials {
-        return try Configuration().getAlertNotificationSDKProps()
+        return try Configuration(withFile: "Tests/cloud_config.json").getAlertNotificationSDKProps()
     }
     
     // Ensure that the Alert object can correctly be written out to a JSON string.
