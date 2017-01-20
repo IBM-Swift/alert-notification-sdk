@@ -1,16 +1,25 @@
-//
-//  MessageService.swift
-//  AlertNotifications
-//
-//  Created by Jim Avery on 12/8/16.
-//
-//
+/**
+ * Copyright IBM Corporation 2016,2017
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
 
 import Foundation
 
 import LoggerAPI
 
 public class MessageService {
+    // Make a POST request for a Message.
     public class func post(_ message: Message, usingCredentials credentials: ServiceCredentials, callback: ((Message?, Error?) -> Void)? = nil) throws {
         let bluemixRequest = try BluemixRequest(usingCredentials: credentials)
         let errors = [400: "The service reported an invalid request.", 401: "Authorization is invalid.", 415: "Invalid media type for message."]
@@ -18,6 +27,7 @@ public class MessageService {
         try bluemixRequest.postMessage(message, callback: bluemixCallback)
     }
     
+    // Make a GET request for a Message.
     public class func get(shortId id: String, usingCredentials credentials: ServiceCredentials, callback: @escaping (Message?, Error?) -> Void) throws {
         let bluemixRequest = try BluemixRequest(usingCredentials: credentials)
         let errors = [401: "Authorization is invalid.", 404: "A message matching this short ID could not be found."]

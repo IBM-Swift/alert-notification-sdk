@@ -1,10 +1,18 @@
-//
-//  Alert.swift
-//  AlertNotifications
-//
-//  Created by Jim Avery on 11/21/16.
-//
-//
+/**
+ * Copyright IBM Corporation 2016,2017
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
 
 import Foundation
 
@@ -60,7 +68,7 @@ public class Alert {
     public let location: String
     public let severity: Severity
     
-    // Optional variables.
+    // Optional variables that can be set by the user.
     public private(set) var id: String?
     public private(set) var shortId: String?
     public private(set) var date: Date?
@@ -72,6 +80,8 @@ public class Alert {
     public private(set) var emailMessageToSend: EmailMessage?
     public private(set) var SMSMessageToSend: String?
     public private(set) var voiceMessageToSend: String?
+    
+    // Optional variables that cannot be set by the user.
     public private(set) var notificationState: NotificationState?
     public private(set) var firstOccurrence: Date?
     public private(set) var lastNotified: Date?
