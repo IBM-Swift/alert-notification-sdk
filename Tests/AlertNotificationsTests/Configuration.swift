@@ -15,9 +15,8 @@
  **/
 
 import Foundation
-import AlertNotifications
-import SwiftyJSON
 import LoggerAPI
+import SwiftyJSON
 import CloudFoundryEnv
 
 public struct Configuration {
@@ -28,7 +27,7 @@ public struct Configuration {
         case Error(String)
     }
     
-    init(withFile configFile: String) throws {
+    public init(withFile configFile: String) throws {
         configurationFile = configFile
         let path = Configuration.getAbsolutePath(relativePath: "/\(configurationFile)", useFallback: false)
         
@@ -49,25 +48,34 @@ public struct Configuration {
         Log.info("Using configuration values from '\(configurationFile)'.")
     }
     
-    func getAlertNotificationSDKProps() throws -> ServiceCredentials {
-        if let alertCredentials = appEnv.getService(spec: "alert-notification-sdk")?.credentials {
-            if let url = alertCredentials["url"] as? String,
-                let name = alertCredentials["name"] as? String,
-                let password = alertCredentials["password"] as? String {
-                let credentials = ServiceCredentials(url: url, name: name, password: password)
-                return credentials
-            }
-        }
-        throw AlertNotificationError.credentialsError("Failed to obtain database service and/or its credentials.")
+    public func getCredentials(forService service: String) -> [String: Any]? {
+        return appEnv.getService(spec: service)?.credentials
+    }
+    
+    public func getPort() -> Int {
+        return appEnv.port
     }
     
     private static func getAbsolutePath(relativePath: String, useFallback: Bool) -> String? {
         let initialPath = #file
-        let components = initialPath.characters.split(separator: "/").map(String.init)
-        let notLastThree = components[0..<components.count - 3]
-        var filePath = "/" + notLastThree.joined(separator: "/") + relativePath
-        
         let fileManager = FileManager.default
+        
+        // We need to search for the root directory of the package
+        // by searching for Package.swift.
+        let components = initialPath.characters.split(separator: "/").map(String.init)
+        var rootPath = initialPath
+        var filePath = ""
+        for index in stride(from: components.count-1, through: 0, by: -1) {
+            let subArray = components[0...index]
+            rootPath = "/" + subArray.joined(separator: "/")
+            if fileManager.fileExists(atPath: rootPath + "/Package.swift") {
+                filePath = rootPath + "/" + relativePath
+                break
+            }
+        }
+        if filePath == "" {
+            return nil
+        }
         
         if fileManager.fileExists(atPath: filePath) {
             return filePath
