@@ -38,10 +38,10 @@ public struct ServiceCredentials {
     // Trim off a trailing slash from the URL.
     private static func removeTrailingSlash(from url: String) -> String {
         var urlCopy = url
-        var lastIndex = url.index(urlCopy.startIndex, offsetBy: urlCopy.characters.count-1)
+        var lastIndex = urlCopy.index(urlCopy.startIndex, offsetBy: urlCopy.characters.count-1)
         while urlCopy.characters.count > 1 && urlCopy[lastIndex] == "/" {
             urlCopy = urlCopy.substring(to: lastIndex)
-            lastIndex = url.index(urlCopy.startIndex, offsetBy: urlCopy.characters.count-1)
+            lastIndex = urlCopy.index(urlCopy.startIndex, offsetBy: urlCopy.characters.count-1)
         }
         return urlCopy
     }
