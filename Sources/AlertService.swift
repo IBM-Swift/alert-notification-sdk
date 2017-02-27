@@ -38,7 +38,7 @@ public class AlertService {
     // Make a DELETE request for an Alert.
     public class func delete(shortId id: String, usingCredentials credentials: ServiceCredentials, callback: ((Error?) -> Void)? = nil) throws {
         let bluemixRequest = try BluemixRequest(usingCredentials: credentials)
-        try bluemixRequest.deleteAlert(shortId: id) { (data, response, error) in
+        try bluemixRequest.deleteAlert(shortId: id) { (data, statusCode, error) in
             // Possible error #1: error received.
             if let error = error {
                 callback?(error)
@@ -46,14 +46,16 @@ public class AlertService {
                 return
             }
             
-            // Possible error #2: bad response code from the server.
-            guard let httpResponse = response as? HTTPURLResponse else {
-                callback?(AlertNotificationError.HTTPError("Could not parse the HTTP response from the server."))
-                Log.error("Could not parse the HTTP response from the server.")
+            // Possible error #2: no response code from the server.
+            guard let statusCode = statusCode else {
+                callback?(AlertNotificationError.HTTPError("No status code could be obtained."))
+                Log.error("No status code could be obtained.")
                 return
             }
+            
+            // Possible error #3: bad response code from the server.
             var bluemixError: String?
-            switch httpResponse.statusCode {
+            switch statusCode {
             case 401:
                 bluemixError = "Authorization is invalid."
             case 404:
@@ -75,8 +77,8 @@ public class AlertService {
     }
     
     // Create a callback function for when we are expecting an Alert object in response.
-    private class func alertCallbackBuilder(statusResponses: [Int: String], withFinalCallback callback: ((Alert?, Error?) -> Void)? = nil) -> (Data?, URLResponse?, Swift.Error?) -> Void {
-        return { (data: Data?, response: URLResponse?, error: Swift.Error?) in
+    private class func alertCallbackBuilder(statusResponses: [Int: String], withFinalCallback callback: ((Alert?, Error?) -> Void)? = nil) -> (Data?, Int?, Swift.Error?) -> Void {
+        return { (data: Data?, statusCode: Int?, error: Swift.Error?) in
             // Possible error #1: error received.
             if let error = error {
                 callback?(nil, error)
@@ -84,15 +86,22 @@ public class AlertService {
                 return
             }
             
-            // Possible error #2: bad response code from the server.
-            if let httpResponse = response as? HTTPURLResponse, let errMessage = statusResponses[httpResponse.statusCode] {
+            // Possible error #2: no response code from the server.
+            guard let statusCode = statusCode else {
+                callback?(nil, AlertNotificationError.HTTPError("No status code could be obtained."))
+                Log.error("No status code could be obtained.")
+                return
+            }
+            
+            // Possible error #3: bad response code from the server.
+            if let errMessage = statusResponses[statusCode] {
                 callback?(nil, AlertNotificationError.bluemixError(errMessage))
                 Log.error(errMessage)
                 return
             }
             
             if let data = data {
-                // Possible error #3: malformed response data.
+                // Possible error #4: malformed response data.
                 guard let alertResponse = Alert(data: data) else {
                     callback?(nil, AlertNotificationError.HTTPError("Malformed response from server: \(String(data: data, encoding: .utf8))"))
                     Log.error("Malformed response from server.")
@@ -102,7 +111,7 @@ public class AlertService {
                 // Perform the callback on the data, because we succeeded.
                 callback?(alertResponse, nil)
             } else {
-                // Possible error #4: no data received.
+                // Possible error #5: no data received.
                 if let error = error {
                     callback?(nil, error)
                     Log.error(error.localizedDescription)

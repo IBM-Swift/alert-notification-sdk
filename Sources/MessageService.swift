@@ -36,8 +36,8 @@ public class MessageService {
     }
     
     // Create a callback function for when we are expecting a Message object in response.
-    private class func messageCallbackBuilder(statusResponses: [Int: String], withFinalCallback callback: ((Message?, Error?) -> Void)? = nil) -> (Data?, URLResponse?, Swift.Error?) -> Void {
-        return { (data: Data?, response: URLResponse?, error: Swift.Error?) in
+    private class func messageCallbackBuilder(statusResponses: [Int: String], withFinalCallback callback: ((Message?, Error?) -> Void)? = nil) -> (Data?, Int?, Swift.Error?) -> Void {
+        return { (data: Data?, statusCode: Int?, error: Swift.Error?) in
             // Possible error #1: error received.
             if let error = error {
                 callback?(nil, error)
@@ -45,15 +45,22 @@ public class MessageService {
                 return
             }
             
-            // Possible error #2: bad response code from the server.
-            if let httpResponse = response as? HTTPURLResponse, let errMessage = statusResponses[httpResponse.statusCode] {
+            // Possible error #2: no response code from the server.
+            guard let statusCode = statusCode else {
+                callback?(nil, AlertNotificationError.HTTPError("No status code could be obtained."))
+                Log.error("No status code could be obtained.")
+                return
+            }
+            
+            // Possible error #3: bad response code from the server.
+            if let errMessage = statusResponses[statusCode] {
                 callback?(nil, AlertNotificationError.bluemixError(errMessage))
                 Log.error(errMessage)
                 return
             }
             
             if let data = data {
-                // Possible error #3: malformed response data.
+                // Possible error #4: malformed response data.
                 guard let messageResponse = Message(data: data) else {
                     callback?(nil, AlertNotificationError.HTTPError("Malformed response from server: \(String(data: data, encoding: .utf8))"))
                     Log.error("Malformed response from server.")
@@ -63,7 +70,7 @@ public class MessageService {
                 // Perform the callback on the data.
                 callback?(messageResponse, nil)
             } else {
-                // Possible error #4: no data received.
+                // Possible error #5: no data received.
                 if let error = error {
                     callback?(nil, error)
                     Log.error(error.localizedDescription)

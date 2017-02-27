@@ -44,14 +44,6 @@ class BluemixRequest {
         self.baseURL = baseURL
     }
     
-    // Convert a Kitura response to a HTTPURLResponse.
-    func convertResponse(_ response: ClientResponse?) -> HTTPURLResponse? {
-        guard let responseURL = response?.urlURL, let responseStatus = response?.status, let httpResponse = HTTPURLResponse(url: responseURL, statusCode: responseStatus, httpVersion: "HTTP/\(response?.httpVersionMajor).\(response?.httpVersionMinor)", headerFields: nil) else {
-            return nil
-        }
-        return httpResponse
-    }
-    
     // Create a URL for a KituraNet request.
     func createKituraNetURL(to baseURL: URL, forType type: String, withMethod method: String, withID id: String?) throws -> URL {
         guard let apiURL = URL(string: "\(type)s/v1/", relativeTo: self.baseURL) else {
@@ -69,7 +61,7 @@ class BluemixRequest {
     }
     
     // Create KituraNet request.
-    func createKituraNetRequest(to baseURL: URL, forType type: String, withMethod method: String, forID id: String? = nil, usingCredentials credentials: ServiceCredentials, callback: @escaping (Data?, URLResponse?, Swift.Error?) -> Void) throws -> ClientRequest {
+    func createKituraNetRequest(to baseURL: URL, forType type: String, withMethod method: String, forID id: String? = nil, usingCredentials credentials: ServiceCredentials, callback: @escaping (Data?, Int?, Swift.Error?) -> Void) throws -> ClientRequest {
         let requestURL = try createKituraNetURL(to: baseURL, forType: type, withMethod: method, withID: id)
         
         guard let urlComponents = URLComponents(string: requestURL.absoluteString), let host = urlComponents.host, let schema = urlComponents.scheme else {
@@ -81,14 +73,13 @@ class BluemixRequest {
         }
         
         let clientCallback: ClientRequest.Callback = { (response: ClientResponse?) in
-            let httpResponse = self.convertResponse(response)
             do {
                 let dataString = try response?.readString()
                 let responseData = dataString?.data(using: String.Encoding.utf8)
-                callback(responseData, httpResponse, nil)
+                callback(responseData, response?.httpStatusCode.rawValue, nil)
             } catch {
                 Log.error(error.localizedDescription)
-                callback(nil, httpResponse, error)
+                callback(nil, response?.httpStatusCode.rawValue, error)
             }
         }
         
@@ -96,11 +87,22 @@ class BluemixRequest {
         return HTTP.request(options, callback: clientCallback)
     }
     
+    // A callback wrapper that extracts a status code from a URLResponse, then calls the callback.
+    func urlResponseCallbackWrapper(callback: @escaping (Data?, Int?, Swift.Error?) -> Void) -> (Data?, URLResponse?, Swift.Error?) -> Void {
+        return {(data: Data?, response: URLResponse?, error: Swift.Error?) in
+            guard let httpResponse = response as? HTTPURLResponse else {
+                callback(data, nil, error)
+                return
+            }
+            callback(data, httpResponse.statusCode, error)
+        }
+    }
+    
     /*
      * Alert requests.
      */
     
-    func postAlert(_ alert: Alert, callback: @escaping (Data?, URLResponse?, Swift.Error?) -> Void) throws {
+    func postAlert(_ alert: Alert, callback: @escaping (Data?, Int?, Swift.Error?) -> Void) throws {
         if self.USE_KITURA_NET {
             let req: ClientRequest = try self.createKituraNetRequest(to: self.baseURL, forType: "alert", withMethod: "POST", usingCredentials: credentials, callback: callback)
             
@@ -121,11 +123,11 @@ class BluemixRequest {
             let alertJSON = try alert.toJSONData()
             request.httpBody = alertJSON
             
-            SharedSession.sendRequest(req: request, callback: callback)
+            SharedSession.sendRequest(req: request, callback: urlResponseCallbackWrapper(callback: callback))
         }
     }
     
-    func getAlert(shortId id: String, callback: @escaping (Data?, URLResponse?, Swift.Error?) -> Void) throws {
+    func getAlert(shortId id: String, callback: @escaping (Data?, Int?, Swift.Error?) -> Void) throws {
         if self.USE_KITURA_NET {
             let req: ClientRequest = try self.createKituraNetRequest(to: self.baseURL, forType: "alert", withMethod: "GET", forID: id, usingCredentials: credentials, callback: callback)
             req.end()
@@ -140,11 +142,11 @@ class BluemixRequest {
             request.httpMethod = "GET"
             request.setValue("Basic \(credentials.authString)", forHTTPHeaderField: "Authorization")
             
-            SharedSession.sendRequest(req: request, callback: callback)
+            SharedSession.sendRequest(req: request, callback: urlResponseCallbackWrapper(callback: callback))
         }
     }
     
-    func deleteAlert(shortId id: String, callback: @escaping (Data?, URLResponse?, Swift.Error?) -> Void) throws {
+    func deleteAlert(shortId id: String, callback: @escaping (Data?, Int?, Swift.Error?) -> Void) throws {
         if self.USE_KITURA_NET {
             let req: ClientRequest = try self.createKituraNetRequest(to: self.baseURL, forType: "alert", withMethod: "DELETE", forID: id, usingCredentials: credentials, callback: callback)
             req.end()
@@ -159,7 +161,7 @@ class BluemixRequest {
             request.httpMethod = "DELETE"
             request.setValue("Basic \(credentials.authString)", forHTTPHeaderField: "Authorization")
             
-            SharedSession.sendRequest(req: request, callback: callback)
+            SharedSession.sendRequest(req: request, callback: urlResponseCallbackWrapper(callback: callback))
         }
     }
     
@@ -167,7 +169,7 @@ class BluemixRequest {
      * Message requests.
      */
     
-    func postMessage(_ message: Message, callback: @escaping (Data?, URLResponse?, Swift.Error?) -> Void) throws {
+    func postMessage(_ message: Message, callback: @escaping (Data?, Int?, Swift.Error?) -> Void) throws {
         if self.USE_KITURA_NET {
             let req: ClientRequest = try self.createKituraNetRequest(to: self.baseURL, forType: "message", withMethod: "POST", usingCredentials: credentials, callback: callback)
             
@@ -188,11 +190,11 @@ class BluemixRequest {
             let messageJSON = try message.toJSONData()
             request.httpBody = messageJSON
             
-            SharedSession.sendRequest(req: request, callback: callback)
+            SharedSession.sendRequest(req: request, callback: urlResponseCallbackWrapper(callback: callback))
         }
     }
     
-    func getMessage(shortId id: String, callback: @escaping (Data?, URLResponse?, Swift.Error?) -> Void) throws {
+    func getMessage(shortId id: String, callback: @escaping (Data?, Int?, Swift.Error?) -> Void) throws {
         if self.USE_KITURA_NET {
             let req: ClientRequest = try self.createKituraNetRequest(to: self.baseURL, forType: "message", withMethod: "GET", forID: id, usingCredentials: credentials, callback: callback)
             req.end()
@@ -207,7 +209,7 @@ class BluemixRequest {
             request.httpMethod = "GET"
             request.setValue("Basic \(credentials.authString)", forHTTPHeaderField: "Authorization")
             
-            SharedSession.sendRequest(req: request, callback: callback)
+            SharedSession.sendRequest(req: request, callback: urlResponseCallbackWrapper(callback: callback))
         }
     }
 }
