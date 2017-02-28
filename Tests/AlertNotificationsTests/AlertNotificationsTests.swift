@@ -31,13 +31,7 @@ class AlertNotificationsTests: XCTestCase {
     // Get our credentials, which are filled in during CI testing.
     class func getCredentialsForTest() throws -> ServiceCredentials {
         let config = try Configuration(withFile: "Tests/cloud_config.json")
-        if let creds = config.getCredentials(forService: "alert-notification-sdk"),
-            let url = creds["url"] as? String,
-            let name = creds["name"] as? String,
-            let password = creds["password"] as? String {
-            return ServiceCredentials(url: url, name: name, password: password)
-        }
-        throw AlertNotificationError.credentialsError("Failed to obtain database service and/or its credentials.")
+        return try config.getAlertNotificationService(forService: "alert-notification-sdk")
     }
     
     // Ensure that the Alert object can correctly be written out to a JSON string.

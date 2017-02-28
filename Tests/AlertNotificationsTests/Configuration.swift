@@ -17,43 +17,46 @@
 import Foundation
 import LoggerAPI
 import SwiftyJSON
+import Configuration
 import CloudFoundryEnv
+import CloudFoundryConfig
+import AlertNotifications
 
 public struct Configuration {
     let configurationFile: String
-    let appEnv: AppEnv
+    let configManager: ConfigurationManager
     
     public enum ConfigError: Error {
         case Error(String)
     }
     
     public init(withFile configFile: String) throws {
+        configManager = ConfigurationManager()
+        
         configurationFile = configFile
-        let path = Configuration.getAbsolutePath(relativePath: "/\(configurationFile)", useFallback: false)
-        
-        guard let finalPath = path else {
+        if let path = Configuration.getAbsolutePath(relativePath: "/\(configurationFile)", useFallback: true) {
+            Log.debug("Configuration file path: \(path)")
+            let fileURL = URL(fileURLWithPath: path).standardized
+            configManager.load(url: fileURL)
+        } else {
             Log.warning("Could not find '\(configFile)'.")
-            appEnv = try CloudFoundryEnv.getAppEnv()
-            return
         }
         
-        let url = URL(fileURLWithPath: finalPath)
-        let configData = try Data(contentsOf: url)
-        let configJson = JSON(data: configData)
-        guard configJson.type == .dictionary, let configDict = configJson.object as? [String: Any] else {
-            Log.error("Invalid format for configuration file.")
-            throw ConfigError.Error("Invalid format for configuration file.")
-        }
-        appEnv = try CloudFoundryEnv.getAppEnv(options: configDict)
+        configManager.load(.environmentVariables)
         Log.info("Using configuration values from '\(configurationFile)'.")
     }
     
+    public func getAlertNotificationService(forService name: String) throws -> ServiceCredentials {
+        let alertNotificationService = try configManager.getAlertNotificationService(name: name)
+        return ServiceCredentials(url: alertNotificationService.url, name: alertNotificationService.name, password: alertNotificationService.password)
+    }
+    
     public func getCredentials(forService service: String) -> [String: Any]? {
-        return appEnv.getService(spec: service)?.credentials
+        return configManager.getService(spec: service)?.credentials
     }
     
     public func getPort() -> Int {
-        return appEnv.port
+        return configManager.port
     }
     
     private static func getAbsolutePath(relativePath: String, useFallback: Bool) -> String? {
