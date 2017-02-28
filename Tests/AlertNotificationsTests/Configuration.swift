@@ -48,7 +48,7 @@ public struct Configuration {
     
     public func getAlertNotificationService(forService name: String) throws -> ServiceCredentials {
         let alertNotificationService = try configManager.getAlertNotificationService(name: name)
-        return ServiceCredentials(url: alertNotificationService.url, name: alertNotificationService.name, password: alertNotificationService.password)
+        return ServiceCredentials(url: alertNotificationService.url, name: alertNotificationService.id, password: alertNotificationService.password)
     }
     
     public func getCredentials(forService service: String) -> [String: Any]? {
