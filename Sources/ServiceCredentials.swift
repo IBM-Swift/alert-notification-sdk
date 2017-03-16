@@ -30,9 +30,27 @@ public struct ServiceCredentials {
     
     // Initializer.
     public init(url: String, name: String, password: String) {
-        self.url = ServiceCredentials.removeTrailingSlash(from: url)
+        self.url = ServiceCredentials.trimURL(url)
         self.name = name
         self.password = password
+    }
+    
+    // Remove "/alerts/v1" or "/messages/v1" from the end of the URL.
+    private static func trimURL(_ url: String) -> String {
+        let trimmedURL = ServiceCredentials.removeTrailingSlash(from: url)
+        
+        let alertIndex = trimmedURL.index(trimmedURL.startIndex, offsetBy: trimmedURL.characters.count-10)
+        let messageIndex = trimmedURL.index(trimmedURL.startIndex, offsetBy: trimmedURL.characters.count-12)
+        
+        if trimmedURL.substring(from: alertIndex) == "/alerts/v1" {
+            return trimmedURL.substring(to: alertIndex)
+        }
+        
+        if trimmedURL.substring(from: messageIndex) == "/messages/v1" {
+            return trimmedURL.substring(to: messageIndex)
+        }
+        
+        return url
     }
     
     // Trim off a trailing slash from the URL.
