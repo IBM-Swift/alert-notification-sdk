@@ -94,7 +94,7 @@ The `Alert.Detail` object is used to provide additional details alongside an ale
 * `name` - A `String` indicating the detail name.
 * `value` - A `String` indicating the corresponding value.
 
-A `Alert.Detail` only has one method, the constructor.
+An `Alert.Detail` only has one method, the constructor.
 
     Alert.Detail(name: String, value: String)
 
@@ -185,7 +185,7 @@ Deletes an `Alert` object from the Alert Notification service corresponding to t
 The `Message` class is used to specify a single instance of a message related to alerts and alert notifications. A `Message` has the following required properties:
 * `subject` - A `String` that acts as the subject line of the message. This can be no more than 80 characters long.
 * `message` - A `String` that acts as the body of the message. This can be no more than 1500 characters long.
-* `recipient` - An array of `Message.Recipient` objects that specifies which people, groups or integrations are to receive the message.
+* `recipients` - An array of `Message.Recipient` objects that specifies which people, groups or integrations are to receive the message.
 
 A `Message` may contain two more properties when it is sent by the Alert Notification service. These cannot be set by the application.
 * `shortId` - A shorter identifying `String` set by the Alert Notification service. This is the identifier that the application should use when attempting to call a `GET` request on a message.
