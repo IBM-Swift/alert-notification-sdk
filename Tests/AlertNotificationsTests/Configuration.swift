@@ -16,7 +16,6 @@
 
 import Foundation
 import LoggerAPI
-import SwiftyJSON
 import Configuration
 import CloudFoundryEnv
 import CloudFoundryConfig
