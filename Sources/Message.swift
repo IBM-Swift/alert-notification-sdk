@@ -71,39 +71,39 @@ public class Message {
     // Create a Message from a JSON string.
     init?(data: Data) {
         let json = try? JSONSerialization.jsonObject(with: data, options: [])
-        if let dictionary = json as? [String: Any] {
-            // Mandatory properties.
-            if let subject = dictionary["Subject"] as? String {
-                self.subject = subject
-            } else {
-                return nil
-            }
-            if let message = dictionary["Message"] as? String {
-                self.message = message
-            } else {
-                return nil
-            }
-            if let recipients = dictionary["Recipients"] as? [[String: String]] {
-                var recipientArray = [Recipient]()
-                for recipient in recipients {
-                    if let name = recipient["Name"], let typeValue = recipient["Type"], let type = RecipientType(rawValue: typeValue.lowercased()), let newRecipient = try? Recipient(name: name, type: type, broadcast: recipient["Broadcast"]) {
-                        recipientArray.append(newRecipient)
-                    }
-                }
-                self.recipients = recipientArray
-            } else {
-                return nil
-            }
-            
-            // Optional properties.
-            if let shortId = dictionary["ShortId"] as? String {
-                self.shortId = shortId
-            }
-            if let internalTime = dictionary["InternalTime"] as? Int {
-                self.internalTime = Date(timeIntervalSince1970: (Double(internalTime)/1000.0) as TimeInterval)
-            }
+        guard let dictionary = json as? [String: Any] else {
+            return nil
+        }
+        
+        // Mandatory properties.
+        if let subject = dictionary["Subject"] as? String {
+            self.subject = subject
         } else {
             return nil
+        }
+        if let message = dictionary["Message"] as? String {
+            self.message = message
+        } else {
+            return nil
+        }
+        if let recipients = dictionary["Recipients"] as? [[String: String]] {
+            var recipientArray = [Recipient]()
+            for recipient in recipients {
+                if let name = recipient["Name"], let typeValue = recipient["Type"], let type = RecipientType(rawValue: typeValue.lowercased()), let newRecipient = try? Recipient(name: name, type: type, broadcast: recipient["Broadcast"]) {
+                    recipientArray.append(newRecipient)
+                }
+            }
+            self.recipients = recipientArray
+        } else {
+            return nil
+        }
+            
+        // Optional properties.
+        if let shortId = dictionary["ShortId"] as? String {
+            self.shortId = shortId
+        }
+        if let internalTime = dictionary["InternalTime"] as? Int {
+            self.internalTime = Date(timeIntervalSince1970: (Double(internalTime)/1000.0) as TimeInterval)
         }
     }
     
