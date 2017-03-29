@@ -244,93 +244,93 @@ public class Alert {
     // JSON initializer.
     init?(data: Data) {
         let json = try? JSONSerialization.jsonObject(with: data, options: [])
-        if let dictionary = json as? [String: Any] {
-            // Mandatory properties.
-            if let summary = dictionary["What"] as? String {
-                self.summary = summary
-            } else {
-                return nil
-            }
-            if let location = dictionary["Where"] as? String {
-                self.location = location
-            } else {
-                return nil
-            }
-            if let severity = dictionary["Severity"] as? String, let sevValue = Alert.getSeverity(from: severity) {
-                self.severity = sevValue
-            } else if let severity = dictionary["Severity"] as? Int, let sevValue = Severity(rawValue: severity) {
-                self.severity = sevValue
-            } else {
-                return nil
-            }
-            
-            // Optional properties.
-            if let id = dictionary["Identifier"] as? String {
-                self.id = id
-            }
-            if let shortId = dictionary["ShortId"] as? String {
-                self.shortId = shortId
-            }
-            if let date = dictionary["When"] as? String {
-                let dateFormatter = DateFormatter()
-                dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-                self.date = dateFormatter.date(from: date)
-            } else if let date = dictionary["When"] as? Int {
-                self.date = Date(timeIntervalSince1970: (Double(date)/1000.0) as TimeInterval)
-            }
-            if let status = dictionary["Type"] as? String, let statusValue = Status(rawValue: status.lowercased()) {
-                self.status = statusValue
-            }
-            if let source = dictionary["Source"] as? String {
-                self.source = source
-            }
-            if let apps = dictionary["ApplicationsOrServices"] as? [String] {
-                self.applicationsOrServices = apps
-            }
-            if let URLs = dictionary["URLs"] as? [[String: String]] {
-                var URLarray = Array<Alert.URL>()
-                for alertURL in URLs {
-                    if let description = alertURL["Description"], let URLvalue = alertURL["URL"] {
-                        URLarray.append(Alert.URL(description: description, URL: URLvalue))
-                    }
-                }
-                self.URLs = URLarray
-            }
-            if let details = dictionary["Details"] as? [[String: String]] {
-                var detailArray = [Detail]()
-                for detail in details {
-                    if let name = detail["Name"], let value = detail["Value"] {
-                        detailArray.append(Detail(name: name, value: value))
-                    }
-                }
-                self.details = detailArray
-            }
-            if let email = dictionary["EmailMessageToSend"] as? [String: String], let subject = email["Subject"], let body = email["Body"] {
-                self.emailMessageToSend = EmailMessage(subject: subject, body: body)
-            }
-            if let SMS = dictionary["SMSMessageToSend"] as? String {
-                self.SMSMessageToSend = SMS
-            }
-            if let voice = dictionary["VoiceMessageToSend"] as? String {
-                self.voiceMessageToSend = voice
-            }
-            if let notificationState = dictionary["NotificationState"] as? String, let notValue = NotificationState(rawValue: notificationState.lowercased()) {
-                self.notificationState = notValue
-            }
-            if let firstOccurrence = dictionary["FirstOccurrence"] as? Int {
-                self.firstOccurrence = Date(timeIntervalSince1970: (Double(firstOccurrence)/1000.0) as TimeInterval)
-            }
-            if let lastNotified = dictionary["LastNotified"] as? Int {
-                self.lastNotified = Date(timeIntervalSince1970: (Double(lastNotified)/1000.0) as TimeInterval)
-            }
-            if let internalTime = dictionary["InternalTime"] as? Int {
-                self.internalTime = Date(timeIntervalSince1970: (Double(internalTime)/1000.0) as TimeInterval)
-            }
-            if let expired = dictionary["Expired"] as? Bool {
-                self.expired = expired
-            }
+        guard let dictionary = json as? [String: Any] else {
+            return nil
+        }
+        
+        // Mandatory properties.
+        if let summary = dictionary["What"] as? String {
+            self.summary = summary
         } else {
             return nil
+        }
+        if let location = dictionary["Where"] as? String {
+            self.location = location
+        } else {
+            return nil
+        }
+        if let severity = dictionary["Severity"] as? String, let sevValue = Alert.getSeverity(from: severity) {
+            self.severity = sevValue
+        } else if let severity = dictionary["Severity"] as? Int, let sevValue = Severity(rawValue: severity) {
+            self.severity = sevValue
+        } else {
+            return nil
+        }
+            
+        // Optional properties.
+        if let id = dictionary["Identifier"] as? String {
+            self.id = id
+        }
+        if let shortId = dictionary["ShortId"] as? String {
+            self.shortId = shortId
+        }
+        if let date = dictionary["When"] as? String {
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+            self.date = dateFormatter.date(from: date)
+        } else if let date = dictionary["When"] as? Int {
+            self.date = Date(timeIntervalSince1970: (Double(date)/1000.0) as TimeInterval)
+        }
+        if let status = dictionary["Type"] as? String, let statusValue = Status(rawValue: status.lowercased()) {
+            self.status = statusValue
+        }
+        if let source = dictionary["Source"] as? String {
+            self.source = source
+        }
+        if let apps = dictionary["ApplicationsOrServices"] as? [String] {
+            self.applicationsOrServices = apps
+        }
+        if let URLs = dictionary["URLs"] as? [[String: String]] {
+            var URLarray = Array<Alert.URL>()
+            for alertURL in URLs {
+                if let description = alertURL["Description"], let URLvalue = alertURL["URL"] {
+                    URLarray.append(Alert.URL(description: description, URL: URLvalue))
+                }
+            }
+            self.URLs = URLarray
+        }
+        if let details = dictionary["Details"] as? [[String: String]] {
+            var detailArray = [Detail]()
+            for detail in details {
+                if let name = detail["Name"], let value = detail["Value"] {
+                    detailArray.append(Detail(name: name, value: value))
+                }
+            }
+            self.details = detailArray
+        }
+        if let email = dictionary["EmailMessageToSend"] as? [String: String], let subject = email["Subject"], let body = email["Body"] {
+            self.emailMessageToSend = EmailMessage(subject: subject, body: body)
+        }
+        if let SMS = dictionary["SMSMessageToSend"] as? String {
+            self.SMSMessageToSend = SMS
+        }
+        if let voice = dictionary["VoiceMessageToSend"] as? String {
+            self.voiceMessageToSend = voice
+        }
+        if let notificationState = dictionary["NotificationState"] as? String, let notValue = NotificationState(rawValue: notificationState.lowercased()) {
+            self.notificationState = notValue
+        }
+        if let firstOccurrence = dictionary["FirstOccurrence"] as? Int {
+            self.firstOccurrence = Date(timeIntervalSince1970: (Double(firstOccurrence)/1000.0) as TimeInterval)
+        }
+        if let lastNotified = dictionary["LastNotified"] as? Int {
+            self.lastNotified = Date(timeIntervalSince1970: (Double(lastNotified)/1000.0) as TimeInterval)
+        }
+        if let internalTime = dictionary["InternalTime"] as? Int {
+            self.internalTime = Date(timeIntervalSince1970: (Double(internalTime)/1000.0) as TimeInterval)
+        }
+        if let expired = dictionary["Expired"] as? Bool {
+            self.expired = expired
         }
     }
     
