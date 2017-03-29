@@ -36,6 +36,14 @@ class BluemixRequest {
         self.baseURL = baseURL
     }
     
+    // Create a URLRequest object with some basic initialization done.
+    func createRequest(forURL url: URL, withMethod method: String) -> URLRequest {
+        var request: URLRequest = URLRequest(url: url)
+        request.httpMethod = method
+        request.setValue("Basic \(credentials.authString)", forHTTPHeaderField: "Authorization")
+        return request
+    }
+    
     // A callback wrapper that extracts a status code from a URLResponse, then calls the callback.
     func urlResponseCallbackWrapper(callback: @escaping (Data?, Int?, Swift.Error?) -> Void) -> (Data?, URLResponse?, Swift.Error?) -> Void {
         return {(data: Data?, response: URLResponse?, error: Swift.Error?) in
@@ -55,10 +63,8 @@ class BluemixRequest {
         guard let apiURL = URL(string: "alerts/v1/", relativeTo: self.baseURL) else {
             throw AlertNotificationError.credentialsError("Invalid URL provided.")
         }
-        var request: URLRequest = URLRequest(url: apiURL)
-        request.httpMethod = "POST"
+        var request: URLRequest = createRequest(forURL: apiURL, withMethod: "POST")
         request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
-        request.setValue("Basic \(credentials.authString)", forHTTPHeaderField: "Authorization")
             
         let alertJSON = try alert.toJSONData()
         request.httpBody = alertJSON
@@ -73,9 +79,7 @@ class BluemixRequest {
         guard let fullURL = URL(string: id, relativeTo: apiURL) else {
             throw AlertNotificationError.alertError("Invalid alert ID provided to GET request.")
         }
-        var request: URLRequest = URLRequest(url: fullURL)
-        request.httpMethod = "GET"
-        request.setValue("Basic \(credentials.authString)", forHTTPHeaderField: "Authorization")
+        let request: URLRequest = createRequest(forURL: fullURL, withMethod: "GET")
             
         SharedSession.sendRequest(req: request, callback: urlResponseCallbackWrapper(callback: callback))
     }
@@ -87,9 +91,7 @@ class BluemixRequest {
         guard let fullURL: URL = URL(string: id, relativeTo: apiURL) else {
             throw AlertNotificationError.alertError("Invalid alert ID provided to DELETE request.")
         }
-        var request: URLRequest = URLRequest(url: fullURL)
-        request.httpMethod = "DELETE"
-        request.setValue("Basic \(credentials.authString)", forHTTPHeaderField: "Authorization")
+        let request: URLRequest = createRequest(forURL: fullURL, withMethod: "DELETE")
             
         SharedSession.sendRequest(req: request, callback: urlResponseCallbackWrapper(callback: callback))
     }
@@ -102,10 +104,8 @@ class BluemixRequest {
         guard let apiURL = URL(string: "messages/v1/", relativeTo: self.baseURL) else {
             throw AlertNotificationError.credentialsError("Invalid URL provided.")
         }
-        var request: URLRequest = URLRequest(url: apiURL)
-        request.httpMethod = "POST"
+        var request: URLRequest = createRequest(forURL: apiURL, withMethod: "POST")
         request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
-        request.setValue("Basic \(credentials.authString)", forHTTPHeaderField: "Authorization")
             
         let messageJSON = try message.toJSONData()
         request.httpBody = messageJSON
@@ -120,9 +120,7 @@ class BluemixRequest {
         guard let fullURL = URL(string: id, relativeTo: apiURL) else {
             throw AlertNotificationError.messageError("Invalid message ID provided to GET request.")
         }
-        var request: URLRequest = URLRequest(url: fullURL)
-        request.httpMethod = "GET"
-        request.setValue("Basic \(credentials.authString)", forHTTPHeaderField: "Authorization")
+        let request: URLRequest = createRequest(forURL: fullURL, withMethod: "GET")
             
         SharedSession.sendRequest(req: request, callback: urlResponseCallbackWrapper(callback: callback))
     }

@@ -150,7 +150,7 @@ class AlertNotificationsTests: XCTestCase {
         
         waitForExpectations(timeout: 60) { error in
             if error != nil {
-                XCTFail("waitForExpectations errored: \(error)")
+                XCTFail("waitForExpectations errored: \(String(describing: error))")
             }
         }
     }
@@ -244,7 +244,7 @@ class AlertNotificationsTests: XCTestCase {
         
         waitForExpectations(timeout: 60) { error in
             if error != nil {
-                XCTFail("waitForExpectations errored: \(error)")
+                XCTFail("waitForExpectations errored: \(String(describing: error))")
             }
         }
     }
