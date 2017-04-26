@@ -30,7 +30,8 @@ class BluemixRequest {
     // Initializer.
     init(usingCredentials credentials: ServiceCredentials) throws {
         self.credentials = credentials
-        guard let baseURL = URL(string: "\(credentials.url)/") else {
+        let stringURL = credentials.url.characters.last == "/" ? credentials.url : "\(credentials.url)/"
+        guard let baseURL = URL(string: stringURL) else {
             throw AlertNotificationError.credentialsError("Invalid URL provided.")
         }
         self.baseURL = baseURL
