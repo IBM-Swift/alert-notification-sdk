@@ -1,8 +1,0 @@
-{
-  "alertnotification": {
-    "url": "<url>",
-    "name": "<name>",
-    "password": "<password>",
-    "swaggerui": "https://ibmnotifybm.mybluemix.net/docs/alerts/v1"
-  }
-}
