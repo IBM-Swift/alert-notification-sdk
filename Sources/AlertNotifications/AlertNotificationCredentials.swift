@@ -15,11 +15,10 @@
  **/
 
 import Foundation
+import CloudEnvironment
 
-public struct ServiceCredentials {
-    public let url: String
-    public let name: String
-    public let password: String
+extension AlertNotificationCredentials {
+    
     // The string used for Basic authentication.
     var authString: String {
         get {
@@ -27,34 +26,27 @@ public struct ServiceCredentials {
             return rawString.data(using: .utf8)!.base64EncodedString()
         }
     }
-    
-    // Initializer.
-    public init(url: String, name: String, password: String) {
-        self.url = ServiceCredentials.trimURL(url)
-        self.name = name
-        self.password = password
-    }
-    
+
     // Remove "/alerts/v1" or "/messages/v1" from the end of the URL.
     private static func trimURL(_ url: String) -> String {
-        let trimmedURL = ServiceCredentials.removeTrailingSlash(from: url)
+        let trimmedURL = AlertNotificationCredentials.removeTrailingSlash(from: url)
         
-        if trimmedURL.characters.count < 10 {
+        if trimmedURL.count < 10 {
             return trimmedURL
         }
         
-        let alertIndex = trimmedURL.index(trimmedURL.startIndex, offsetBy: trimmedURL.characters.count-10)
-        if trimmedURL.substring(from: alertIndex) == "/alerts/v1" {
-            return trimmedURL.substring(to: alertIndex)
+        let alertIndex = trimmedURL.index(trimmedURL.startIndex, offsetBy: trimmedURL.count-10)
+        if trimmedURL[alertIndex...] == "/alerts/v1" {
+            return String(trimmedURL[..<alertIndex])
         }
         
-        if trimmedURL.characters.count < 12 {
+        if trimmedURL.count < 12 {
             return trimmedURL
         }
         
-        let messageIndex = trimmedURL.index(trimmedURL.startIndex, offsetBy: trimmedURL.characters.count-12)
-        if trimmedURL.substring(from: messageIndex) == "/messages/v1" {
-            return trimmedURL.substring(to: messageIndex)
+        let messageIndex = trimmedURL.index(trimmedURL.startIndex, offsetBy: trimmedURL.count-12)
+        if trimmedURL[messageIndex...] == "/messages/v1" {
+            return String(trimmedURL[..<messageIndex])
         }
         
         return url
@@ -62,15 +54,15 @@ public struct ServiceCredentials {
     
     // Trim off a trailing slash from the URL.
     private static func removeTrailingSlash(from url: String) -> String {
-        if url.characters.count < 1 {
+        if url.count < 1 {
             return url
         }
         
         var urlCopy = url
-        var lastIndex = urlCopy.index(urlCopy.startIndex, offsetBy: urlCopy.characters.count-1)
-        while urlCopy.characters.count > 1 && urlCopy[lastIndex] == "/" {
-            urlCopy = urlCopy.substring(to: lastIndex)
-            lastIndex = urlCopy.index(urlCopy.startIndex, offsetBy: urlCopy.characters.count-1)
+        var lastIndex = urlCopy.index(urlCopy.startIndex, offsetBy: urlCopy.count-1)
+        while urlCopy.count > 1 && urlCopy[lastIndex] == "/" {
+            urlCopy = String(urlCopy[..<lastIndex])
+            lastIndex = urlCopy.index(urlCopy.startIndex, offsetBy: urlCopy.count-1)
         }
         return urlCopy
     }

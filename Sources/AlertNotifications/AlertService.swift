@@ -15,30 +15,31 @@
  **/
 
 import Foundation
-
 import LoggerAPI
+import CloudEnvironment
 
 public class AlertService {
+
     // Make a POST request for an Alert.
-    public class func post(_ alert: Alert, usingCredentials credentials: ServiceCredentials, callback: ((Alert?, Error?) -> Void)? = nil) throws {
-        let bluemixRequest = try BluemixRequest(usingCredentials: credentials)
+    public class func post(_ alert: Alert, usingCredentials credentials: AlertNotificationCredentials, callback: ((Alert?, Error?) -> Void)? = nil) throws {
+        let cloudRequest = try CloudRequest(usingCredentials: credentials)
         let errors = [208: "This error has already been reported.", 400: "The service reported an invalid request.", 401: "Authorization is invalid.", 415: "Invalid media type for alert."]
-        let bluemixCallback = AlertService.alertCallbackBuilder(statusResponses: errors, withFinalCallback: callback)
-        try bluemixRequest.postAlert(alert, callback: bluemixCallback)
+        let cloudCallback = AlertService.alertCallbackBuilder(statusResponses: errors, withFinalCallback: callback)
+        try cloudRequest.postAlert(alert, callback: cloudCallback)
     }
     
     // Make a GET request for an Alert.
-    public class func get(shortId id: String, usingCredentials credentials: ServiceCredentials, callback: @escaping (Alert?, Error?) -> Void) throws {
-        let bluemixRequest = try BluemixRequest(usingCredentials: credentials)
+    public class func get(shortId id: String, usingCredentials credentials: AlertNotificationCredentials, callback: @escaping (Alert?, Error?) -> Void) throws {
+        let cloudRequest = try CloudRequest(usingCredentials: credentials)
         let errors = [401: "Authorization is invalid.", 404: "An alert matching this short ID could not be found."]
-        let bluemixCallback = AlertService.alertCallbackBuilder(statusResponses: errors, withFinalCallback: callback)
-        try bluemixRequest.getAlert(shortId: id, callback: bluemixCallback)
+        let cloudCallback = AlertService.alertCallbackBuilder(statusResponses: errors, withFinalCallback: callback)
+        try cloudRequest.getAlert(shortId: id, callback: cloudCallback)
     }
     
     // Make a DELETE request for an Alert.
-    public class func delete(shortId id: String, usingCredentials credentials: ServiceCredentials, callback: ((Error?) -> Void)? = nil) throws {
-        let bluemixRequest = try BluemixRequest(usingCredentials: credentials)
-        try bluemixRequest.deleteAlert(shortId: id) { (data, statusCode, error) in
+    public class func delete(shortId id: String, usingCredentials credentials: AlertNotificationCredentials, callback: ((Error?) -> Void)? = nil) throws {
+        let cloudRequest = try CloudRequest(usingCredentials: credentials)
+        try cloudRequest.deleteAlert(shortId: id) { (data, statusCode, error) in
             // Possible error #1: error received.
             if let error = error {
                 callback?(error)
@@ -54,20 +55,20 @@ public class AlertService {
             }
             
             // Possible error #3: bad response code from the server.
-            var bluemixError: String?
+            var cloudError: String?
             switch statusCode {
             case 401:
-                bluemixError = "Authorization is invalid."
+                cloudError = "Authorization is invalid."
             case 404:
-                bluemixError = "The alert could not be found."
+                cloudError = "The alert could not be found."
             case 500:
-                bluemixError = "There was an error archiving the alert."
+                cloudError = "There was an error archiving the alert."
             default:
                 break
             }
-            if let bluemixError = bluemixError {
-                callback?(AlertNotificationError.bluemixError(bluemixError))
-                Log.error(bluemixError)
+            if let cloudError = cloudError {
+                callback?(AlertNotificationError.ibmCloudError(cloudError))
+                Log.error(cloudError)
                 return
             }
             
@@ -95,7 +96,7 @@ public class AlertService {
             
             // Possible error #3: bad response code from the server.
             if let errMessage = statusResponses[statusCode] {
-                callback?(nil, AlertNotificationError.bluemixError(errMessage))
+                callback?(nil, AlertNotificationError.ibmCloudError(errMessage))
                 Log.error(errMessage)
                 return
             }

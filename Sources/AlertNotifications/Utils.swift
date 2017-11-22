@@ -20,7 +20,7 @@ public enum AlertNotificationError: Error, CustomStringConvertible {
     case alertError(String)
     case messageError(String)
     case HTTPError(String)
-    case bluemixError(String)
+    case ibmCloudError(String)
     case credentialsError(String)
     
     public var description: String {
@@ -31,7 +31,7 @@ public enum AlertNotificationError: Error, CustomStringConvertible {
             return "Message error: \(message)"
         case .HTTPError(let message):
             return "HTTP error: \(message)"
-        case .bluemixError(let message):
+        case .ibmCloudError(let message):
             return "Bluemix error: \(message)"
         case .credentialsError(let message):
             return "Credentials error: \(message)"
