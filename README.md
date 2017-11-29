@@ -27,8 +27,7 @@ In order to use this SDK, you need to add it to the dependencies in your applica
         ...
 
         dependencies: [
-            .Package(url: "https://github.com/IBM-Swift/alert-notification-sdk.git", majorVersion: 1),
-
+            .package(url: "https://github.com/IBM-Swift/alert-notification-sdk.git", .upToNextMajor(from: "2.0.0")),
             ...
 
         ])
