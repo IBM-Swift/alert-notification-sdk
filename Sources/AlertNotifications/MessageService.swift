@@ -15,21 +15,22 @@
  **/
 
 import Foundation
-
 import LoggerAPI
+import CloudEnvironment
 
 public class MessageService {
+
     // Make a POST request for a Message.
-    public class func post(_ message: Message, usingCredentials credentials: ServiceCredentials, callback: ((Message?, Error?) -> Void)? = nil) throws {
-        let bluemixRequest = try BluemixRequest(usingCredentials: credentials)
+    public class func post(_ message: Message, usingCredentials credentials: AlertNotificationCredentials, callback: ((Message?, Error?) -> Void)? = nil) throws {
+        let bluemixRequest = try CloudRequest(usingCredentials: credentials)
         let errors = [400: "The service reported an invalid request.", 401: "Authorization is invalid.", 415: "Invalid media type for message."]
         let bluemixCallback = MessageService.messageCallbackBuilder(statusResponses: errors, withFinalCallback: callback)
         try bluemixRequest.postMessage(message, callback: bluemixCallback)
     }
     
     // Make a GET request for a Message.
-    public class func get(shortId id: String, usingCredentials credentials: ServiceCredentials, callback: @escaping (Message?, Error?) -> Void) throws {
-        let bluemixRequest = try BluemixRequest(usingCredentials: credentials)
+    public class func get(shortId id: String, usingCredentials credentials: AlertNotificationCredentials, callback: @escaping (Message?, Error?) -> Void) throws {
+        let bluemixRequest = try CloudRequest(usingCredentials: credentials)
         let errors = [401: "Authorization is invalid.", 404: "A message matching this short ID could not be found."]
         let bluemixCallback = MessageService.messageCallbackBuilder(statusResponses: errors, withFinalCallback: callback)
         try bluemixRequest.getMessage(shortId: id, callback: bluemixCallback)
@@ -54,7 +55,7 @@ public class MessageService {
             
             // Possible error #3: bad response code from the server.
             if let errMessage = statusResponses[statusCode] {
-                callback?(nil, AlertNotificationError.bluemixError(errMessage))
+                callback?(nil, AlertNotificationError.ibmCloudError(errMessage))
                 Log.error(errMessage)
                 return
             }

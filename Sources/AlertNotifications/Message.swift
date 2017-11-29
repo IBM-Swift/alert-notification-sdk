@@ -57,11 +57,11 @@ public class Message {
      * Initializers.
      */
     public init(subject: String, message: String, recipients: [Recipient]) throws {
-        if subject.characters.count > 80 {
+        if subject.count > 80 {
             throw AlertNotificationError.messageError("Message subject cannot be longer than 80 characters.")
         }
         self.subject = subject
-        if message.characters.count > 1500 {
+        if message.count > 1500 {
             throw AlertNotificationError.messageError("Message body cannot be longer than 1500 characters.")
         }
         self.message = message

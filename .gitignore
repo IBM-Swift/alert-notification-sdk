@@ -1,5 +1,8 @@
 .DS_Store
-/.build
+.build
+.build-ubuntu
+build/
 /Packages
 /*.xcodeproj
 *.backup
+Package.resolved

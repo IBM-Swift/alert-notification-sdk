@@ -1,18 +1,18 @@
-[![Build Status - Master](https://api.travis-ci.com/IBM-Swift/alert-notification-sdk.svg?token=mJT5PYB2xpM2BrzG4qWD&branch=master)](https://travis-ci.com/IBM-Swift/alert-notification-sdk)
+[![Build Status](https://travis-ci.org/IBM-Swift/alert-notification-sdk.svg?branch=master)](https://travis-ci.org/IBM-Swift/alert-notification-sdk)
 ![macOS](https://img.shields.io/badge/os-macOS-green.svg?style=flat)
 ![Linux](https://img.shields.io/badge/os-linux-green.svg?style=flat)
 
 Alert Notification Service SDK
 ===============================
 
-The Alert Notification Service SDK allows Swift developers to utilize the Alert Notifications Bluemix service in their applications, allowing for the proactive remediation of issues for applications running on the Bluemix cloud. Alerts and messages can be created, received and deleted through the use of this SDK. The servive can be acquired at [this link](https://console.ng.bluemix.net/catalog/services/ibm-alert-notification/), and the documentation is available at [this link](https://console.ng.bluemix.net/docs/services/AlertNotification/index.html); both links may require a Bluemix account to access. A non-Bluemix Quick Start Guide can be viewed on the [IBM website](https://www.ibm.com/blogs/bluemix/2015/12/quick-start-guide-to-alert-notification-service/).
- 
-This SDK is for the consumption/usage of the Alert Notification service and not for administration of the service. Adding users, groups, notification policies, etc. should be done through the Bluemix dashboard.
+The Alert Notification Service SDK allows Swift developers to utilize the Alert Notifications IBM Cloud service in their applications, allowing for the proactive remediation of issues for applications running on IBM Cloud. Alerts and messages can be created, received and deleted through the use of this SDK. The servive can be acquired at [this link](https://console.ng.bluemix.net/catalog/services/ibm-alert-notification/), and the documentation is available at [this link](https://console.ng.bluemix.net/docs/services/AlertNotification/index.html); both links may require a IBM Cloud account to access. A non-IBM Cloud Quick Start Guide can be viewed on the [IBM website](https://www.ibm.com/blogs/bluemix/2015/12/quick-start-guide-to-alert-notification-service/).
+
+This SDK is for the consumption/usage of the Alert Notification service and not for administration of the service. Adding users, groups, notification policies, etc. should be done through the IBM Cloud dashboard.
 
 Swift Version
 -------------
 
-The Alert Notification SDK works with the `3.1.1` release version of the Swift binaries. You can download this version from [Swift.org](https://swift.org/download/#releases).
+The Alert Notification SDK works with the `4.0.2` release version of the Swift binaries. You can download this version from [Swift.org](https://swift.org/download/#releases).
 
 Usage
 -----
@@ -27,8 +27,7 @@ In order to use this SDK, you need to add it to the dependencies in your applica
         ...
 
         dependencies: [
-            .Package(url: "https://github.com/IBM-Swift/alert-notification-sdk.git", majorVersion: 1),
-
+            .package(url: "https://github.com/IBM-Swift/alert-notification-sdk.git", .upToNextMajor(from: "2.0.0")),
             ...
 
         ])
@@ -38,7 +37,7 @@ Once the `Package.swift` file has been updated, import the `AlertNotifications` 
 Credentials Setup
 -----------------
 
-In order to use all of the features of the Alert Notifications SDK, you need an instance of the Alert Notifications service (be aware that this is a paid service only). Once you have obtained an instance of this service, select it from your Bluemix dashboard, and then click the "Service Credentials" tab. Create a credential if you have not already.
+In order to use all of the features of the Alert Notifications SDK, you need an instance of the Alert Notifications service (be aware that this is a paid service only). Once you have obtained an instance of this service, select it from your IBM Cloud dashboard, and then click the "Service Credentials" tab. Create a credential if you have not already.
 
 Once you have a credential created, select "View Credentials" and take note of the information that appears there. You will need the entire `name` and `password` fields for your application, but **you should only use the `url` field up to and including `/api`.** Do not include any portions of the `url` that come after that.
 
@@ -61,7 +60,7 @@ An `Alert` can also be given these additional optional properties by the applica
 * `date` - A `Date` object indicating when the alert was raised.
 * `status` - A property of type `Alert.Status` indicating whether or not the alert has been resolved. The default value is `.problem`.
 * `source` - A `String` indicating the source of the alert condition.
-* `applicationsOrServices` - An array of `String`s, indicating which Bluemix applications or services are impacted by this alert.
+* `applicationsOrServices` - An array of `String`s, indicating which IBM Cloud applications or services are impacted by this alert.
 * `URLs` - An array of `Alert.URL` objects, to supply additional links associated with the alert.
 * `details` - An array of `Alert.Detail` objects, to provide additional key-value pairs as details associated with the alert.
 * `emailMessageToSend` - An `Alert.EmailMessage` object specifying an e-mail message to be sent to recipients when the alert is posted. It may optionally be formatted using Mustache templates.
@@ -226,10 +225,10 @@ Posts a provided `Message` object to the Alert Notification service. The service
     MessageService.get(shortId: String, usingCredentials: ServiceCredentials, callback: (Message?, Error?) -> Void) throws
 
 Retrieves a `Message` object from the Alert Notification service corresponding to the provided `shortId` parameter. Note that this is not the same as the `id` parameter that is used for deduplication. Unlike the `post` function, a callback function with the signature `(Message?, Error?) -> Void` is required for this method. This method only throws errors that occur before the underlying GET request is made, or while making the request; any errors that occur after this point are passed through the callback function.
- 
+
 ### ServiceCredentials
 
-The `ServiceCredentials` class is used to specify authentication credentials for the Alert Notification service on Bluemix. This is the object that is passed into all `AlertService` and `MessageService` functions. A `ServiceCredentials` object has the following required properties, directly corresponding to the credentials found in the Bluemix service (see the "Credentials Setup") section above:
+The `ServiceCredentials` class is used to specify authentication credentials for the Alert Notification service on IBM Cloud. This is the object that is passed into all `AlertService` and `MessageService` functions. A `ServiceCredentials` object has the following required properties, directly corresponding to the credentials found in the IBM Cloud service (see the "Credentials Setup") section above:
 * `url` - The URL that the SDK will connect to in order to create, retrieve and delete alerts or messages. Note that you should only include the URL provided in the service credentials up to and including `/api`.
 * `name` - The user name for the service.
 * `password` - The password used to authenticate with the service.

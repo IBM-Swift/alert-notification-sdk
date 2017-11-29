@@ -16,24 +16,49 @@
 
 import XCTest
 @testable import AlertNotifications
+import CloudEnvironment
+
+public enum ConfigError: Error {
+    case error(String)
+}
 
 class AlertNotificationsTests: XCTestCase {
+    
     // Get a generic alert.
     class func getAlertForTest() throws -> Alert {
-        return try Alert.Builder().setSummary("TestSummary").setLocation("TestLocation").setSeverity(.fatal).setID("TestID").setDate(fromIntInMilliseconds: 0).setStatus(.problem).setSource("TestSource").setApplicationsOrServices(["TestApps"]).setURLs([Alert.URL(description: "TestDesc", URL: "TestURL")]).setDetails([Alert.Detail(name: "TestName", value: "TestValue")]).setEmailMessageToSend(Alert.EmailMessage(subject: "TestSubject", body: "TestBody")).setSMSMessageToSend("TestSMS").setVoiceMessageToSend("TestVoice").build()
+        return try Alert.Builder()
+            .setSummary("TestSummary")
+            .setLocation("TestLocation")
+            .setSeverity(.fatal)
+            .setID("TestID")
+            .setDate(fromIntInMilliseconds: 0)
+            .setStatus(.problem)
+            .setSource("TestSource")
+            .setApplicationsOrServices(["TestApps"])
+            .setURLs([Alert.URL(description: "TestDesc", URL: "TestURL")])
+            .setDetails([Alert.Detail(name: "TestName", value: "TestValue")])
+            .setEmailMessageToSend(Alert.EmailMessage(subject: "TestSubject", body: "TestBody"))
+            .setSMSMessageToSend("TestSMS")
+            .setVoiceMessageToSend("TestVoice")
+            .build()
     }
-    
+
     // Get a generic message.
     class func getMessageForTest() throws -> Message {
         return try Message(subject: "TestSubject", message: "TestMessage", recipients: [Message.Recipient(name: "TestUser", type: .user, broadcast: "TestBroadcast")])
     }
-    
+
     // Get our credentials, which are filled in during CI testing.
-    class func getCredentialsForTest() throws -> ServiceCredentials {
-        let config = try Configuration(withFile: "Tests/cloud_config.json")
-        return try config.getAlertNotificationService(forService: "alert-notification-sdk")
+    class func getCredentialsForTest() throws -> AlertNotificationCredentials {
+        let cloudEnv = CloudEnv(mappingsFilePath: "Tests/AlertNotificationsTests/config")
+
+        guard let credentials = cloudEnv.getAlertNotificationCredentials(name: "alertnotification") else {
+            throw ConfigError.error("Could not retrieve alert notification credentials")
+        }
+        
+        return credentials
     }
-    
+
     // Ensure that the Alert object can correctly be written out to a JSON string.
     func testAlertToJSON() throws {
         let newAlert = try AlertNotificationsTests.getAlertForTest()
@@ -46,7 +71,7 @@ class AlertNotificationsTests: XCTestCase {
             throw AlertNotificationError.alertError("Could not convert Alert to String.")
         }
         XCTAssertNotNil(alertJsonString)
-        
+
         // Ensure the JSON data was written out correctly.
         XCTAssert(alertJsonString.contains("\"What\":\"TestSummary\""))
         XCTAssert(alertJsonString.contains("\"Where\":\"TestLocation\""))
@@ -68,13 +93,13 @@ class AlertNotificationsTests: XCTestCase {
         XCTAssert(alertJsonString.contains("\"SMSMessageToSend\":\"TestSMS\""))
         XCTAssert(alertJsonString.contains("\"VoiceMessageToSend\":\"TestVoice\""))
     }
-    
+
     // Run through the full POST/GET/DELETE alert suite with an actual Bluemix service.
     func testAlertServices() throws {
         let testExpectation = expectation(description: "Runs through POST, GET and DELETE for alerts on a Bluemix instance.")
         var shortId: String? = nil
         let credentials = try AlertNotificationsTests.getCredentialsForTest()
-        
+
         func postCallback(alert: Alert?, error: Swift.Error?) {
             if let error = error {
                 XCTFail("POST returned with error: \(error)")
@@ -100,7 +125,7 @@ class AlertNotificationsTests: XCTestCase {
                 testExpectation.fulfill()
             }
         }
-        
+
         func getCallback(alert: Alert?, error: Swift.Error?) {
             if let error = error {
                 XCTFail("GET returned with error: \(error)")
@@ -130,31 +155,31 @@ class AlertNotificationsTests: XCTestCase {
                 testExpectation.fulfill()
             }
         }
-        
+
         func deleteCallback(error: Swift.Error?) {
             if let error = error {
                 XCTFail("DELETE returned with error: \(error)")
             }
-            
+
             testExpectation.fulfill()
         }
-        
+
         let newAlert = try AlertNotificationsTests.getAlertForTest()
-        
+
         do {
             try AlertService.post(newAlert, usingCredentials: credentials, callback: postCallback)
         } catch {
             XCTFail("Alert services test failed: \(error)")
             testExpectation.fulfill()
         }
-        
+
         waitForExpectations(timeout: 60) { error in
             if error != nil {
                 XCTFail("waitForExpectations errored: \(String(describing: error))")
             }
         }
     }
-    
+
     // Ensure that the Message object can correctly be written out to a JSON string.
     func testMessageToJSON() throws {
         let newMessage = try AlertNotificationsTests.getMessageForTest()
@@ -167,7 +192,7 @@ class AlertNotificationsTests: XCTestCase {
             throw AlertNotificationError.messageError("Could not convert Message object to String.")
         }
         XCTAssertNotNil(messageJsonString)
-        
+
         // Ensure the JSON data was written out correctly.
         XCTAssert(messageJsonString.contains("\"Message\":\"TestMessage\""))
         XCTAssert(messageJsonString.contains("\"Subject\":\"TestSubject\""))
@@ -176,13 +201,13 @@ class AlertNotificationsTests: XCTestCase {
         XCTAssert(messageJsonString.contains("\"Name\":\"TestUser\""))
         XCTAssert(messageJsonString.contains("\"Broadcast\":\"TestBroadcast\""))
     }
-    
+
     // Run through the full POST/GET message suite with an actual Bluemix service.
     func testMessageServices() throws {
         let testExpectation = expectation(description: "Runs through POST and GET for messages on a Bluemix instance.")
         var shortId: String? = nil
         let credentials = try AlertNotificationsTests.getCredentialsForTest()
-        
+
         func postCallback(message: Message?, error: Swift.Error?) {
             if let error = error {
                 XCTFail("POST returned with error: \(error)")
@@ -208,7 +233,7 @@ class AlertNotificationsTests: XCTestCase {
                 testExpectation.fulfill()
             }
         }
-        
+
         func getCallback(message: Message?, error: Swift.Error?) {
             if let error = error {
                 XCTFail("GET returned with error: \(error)")
@@ -229,26 +254,26 @@ class AlertNotificationsTests: XCTestCase {
             if messageId != shortId {
                 XCTFail("Message from GET request has incorrect short ID for unknown reasons.")
             }
-            
+
             testExpectation.fulfill()
         }
-        
+
         let newMessage = try AlertNotificationsTests.getMessageForTest()
-        
+
         do {
             try MessageService.post(newMessage, usingCredentials: credentials, callback: postCallback)
         } catch {
             XCTFail("Message services test failed: \(error)")
             testExpectation.fulfill()
         }
-        
+
         waitForExpectations(timeout: 60) { error in
             if error != nil {
                 XCTFail("waitForExpectations errored: \(String(describing: error))")
             }
         }
     }
-    
+
     // Test the entire flow actually going through Bluemix.
 
     static var allTests : [(String, (AlertNotificationsTests) -> () throws -> Void)] {

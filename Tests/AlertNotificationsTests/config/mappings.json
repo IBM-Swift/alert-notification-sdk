@@ -1,0 +1,7 @@
+{
+    "alertnotification": {
+        "searchPatterns": [
+            "file:Tests/AlertNotificationsTests/config/configuration.json:alertnotification"
+        ]
+      }
+}

@@ -15,28 +15,38 @@
  **/
 
 import Foundation
-
 import LoggerAPI
+import CloudEnvironment
 
-class BluemixRequest {
+class CloudRequest {
     /*
      * Instance veriables and methods.
      */
     
     // Common variables.
     let baseURL: URL
-    let credentials: ServiceCredentials
+    let credentials: AlertNotificationCredentials
     
     // Initializer.
-    init(usingCredentials credentials: ServiceCredentials) throws {
+    init(usingCredentials credentials: AlertNotificationCredentials) throws {
         self.credentials = credentials
-        let stringURL = credentials.url.characters.last == "/" ? credentials.url : "\(credentials.url)/"
+        let stringURL = credentials.url.last == "/" ? credentials.url : "\(credentials.url)/"
         guard let baseURL = URL(string: stringURL) else {
             throw AlertNotificationError.credentialsError("Invalid URL provided.")
         }
-        self.baseURL = baseURL
+        let suffix = baseURL.pathComponents.suffix(from: 2)
+        self.baseURL = suffix == ["alerts", "v1"] || suffix == ["messages", "v1"] ? baseURL.deletingLastPathComponent().deletingLastPathComponent()
+            :
+            baseURL
     }
     
+    // Trim Path
+    func trimBasePath(_ path: URL) -> URL {
+        let suffix = path.pathComponents.suffix(from: 2)
+        return suffix == ["alerts", "v1"] || suffix == ["messages", "v1"] ? path.deletingLastPathComponent().deletingLastPathComponent()
+            :
+            path
+    }
     // Create a URLRequest object with some basic initialization done.
     func createRequest(forURL url: URL, withMethod method: String) -> URLRequest {
         var request: URLRequest = URLRequest(url: url)
