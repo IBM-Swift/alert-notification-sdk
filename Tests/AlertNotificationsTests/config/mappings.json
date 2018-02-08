@@ -1,7 +1,9 @@
 {
     "alertnotification": {
-        "searchPatterns": [
-            "file:Tests/AlertNotificationsTests/config/configuration.json:alertnotification"
-        ]
-      }
+        "credentials": {
+            "searchPatterns": [
+                "file:Tests/AlertNotificationsTests/config/configuration.json:alertnotification"
+            ]
+        }
+    }
 }
