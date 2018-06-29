@@ -12,7 +12,7 @@ This SDK is for the consumption/usage of the Alert Notification service and not 
 Swift Version
 -------------
 
-The Alert Notification SDK works with the `4.0.3` release version of the Swift binaries. You can download this version from [Swift.org](https://swift.org/download/#releases).
+The Alert Notification SDK works with the `4.1.2` release version of the Swift binaries. You can download this version from [Swift.org](https://swift.org/download/#releases).
 
 Usage
 -----
